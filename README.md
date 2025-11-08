@@ -5,7 +5,7 @@ Mentor: _Ilyes Meftah_
 
 Traditional wildfire burn probability assessment relies heavily on expensive physical fire spread model simulations, static fuel cover, and outdated historical ignitions. This project will explore whether we can estimate historical fire burn probabilities using widely available and dynamic geospatial, vegetation, topographic, and weather data instead. Using historical wildfire perimeter data from the Monitoring Trends in Burn Severity (MTBS) program for San Diego County, we will replicate and adapt the statistical methods presented in Climate Risks From Stress, Insects and Fire Across US Forests. (1). Model performance will be evaluated through cross-validation and out-of-sample testing (2005–2009), followed by spatial mapping of ensemble burn probabilities and an assessment of structures at risk. The resulting framework aims to provide a cost-efficient, reproducible method for local wildfire risk assessment and real-time resilience planning. 
 
-Though we have not gotten to code yet, our detailed plan for the data sources and technical implementation of our project is below. 
+Though we have not gotten to implementation yet, our detailed plan for the data sources and technical implementation of our project is below. 
 
 ## Data
 We will use the following six data sources, classified as either Training, Predictor, or Spacial Domain.
