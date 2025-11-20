@@ -1,0 +1,13 @@
+name: cotality-capstone-q1
+channels:
+  - defaults
+dependencies:
+  - python=3.13
+  - xarray
+  - pyproj
+  - requests
+  - geopandas
+  - shapely
+  - rasterio
+  - rioxarray
+prefix: C:\Users\lacha laptop\anaconda3\envs\cotality-capstone-q1
