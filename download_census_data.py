@@ -1,11 +1,6 @@
-"""
-Download US County shapefile data from Census Bureau TIGER/Line database.
-"""
-import os
 import urllib.request
 import zipfile
 from pathlib import Path
-
 
 def download_census_county_data(output_dir="data/tl_2025_us_county"):
     """
