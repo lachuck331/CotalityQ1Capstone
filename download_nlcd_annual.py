@@ -214,9 +214,9 @@ def download_nlcd_annual_data(output_dir: Path = OUTPUT_DIR, max_workers: Option
     if not years:
         return
 
-    years = [2002]
+    # years = [2002]
 
-    worker_count = max_workers or min(8, len(years))
+    worker_count = max_workers or min(5, len(years))
 
     print(f"Loading San Diego County shapefile")
     if not SD_COUNTY.exists():

@@ -148,16 +148,25 @@ def download_and_process_prism_data(start_year, end_year, sd_county, worker_id=0
 
 def verify_prism_output():
     found_files = []
+
+    DELETE_EXTENSIONS = ['.zip', '.xml', '.tif', '.aux.xml']
+    delete_count = 0
+
     for root, dirs, files in os.walk(OUTPUT_DIR):
         for file in files:
+            full_path = os.path.join(root, file)
             if file.endswith(".nc"):
-                found_files.append(os.path.join(root, file))
-    
+                found_files.append(full_path)
+            elif any(file.endswith(ext) for ext in DELETE_EXTENSIONS):
+                os.remove(full_path)
+                delete_count += 1
+
     if not found_files:
         print("FAILED: No subsetted NetCDF files found.")
         return
     
     print(f"Found {len(found_files)} subsetted files.")
+    print(f"Deleted {delete_count} files.")
     
     # Check the first file
     test_file = found_files[0]
