@@ -146,7 +146,7 @@ def download_and_process_prism_data(start_year, end_year, sd_county, worker_id=0
                     
                     pbar.update(1)
 
-def verify_subset_output():
+def verify_prism_output():
     found_files = []
     for root, dirs, files in os.walk(OUTPUT_DIR):
         for file in files:
@@ -238,7 +238,7 @@ def main():
             except Exception as e:
                 print(f"Worker failed with error: {e}")
 
-    verify_subset_output()
+    verify_prism_output()
 
 if __name__ == "__main__":
     print("Starting PRISM data download and processing...")
