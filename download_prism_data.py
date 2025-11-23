@@ -168,34 +168,50 @@ def verify_prism_output():
     print(f"Found {len(found_files)} subsetted files.")
     print(f"Deleted {delete_count} files.")
     
-    # Check the first file
-    test_file = found_files[0]
-    print(f"Checking {test_file}...")
-    
+    # Load SD shapefile once for comparison
+    sd_shapefile_path = os.path.join("data", "sd_county", "sd_county.shp")
     try:
-        rds = rioxarray.open_rasterio(test_file)
-        print(f"  CRS: {rds.rio.crs}")
-        print(f"  Bounds: {rds.rio.bounds()}")
-        print(f"  Shape: {rds.shape}")
-        
-        # Load SD shapefile to compare bounds roughly
-        sd_shapefile_path = os.path.join("data", "sd_county", "sd_county.shp")
         sd_county = gpd.read_file(sd_shapefile_path)
-        sd_county = sd_county.to_crs(rds.rio.crs)
-        sd_bounds = sd_county.total_bounds
-        print(f"  SD County Bounds: {sd_bounds}")
-        
-        # Check if raster bounds overlap with SD bounds
-        r_bounds = rds.rio.bounds()
-        overlap = not (r_bounds[2] < sd_bounds[0] or r_bounds[0] > sd_bounds[2] or r_bounds[3] < sd_bounds[1] or r_bounds[1] > sd_bounds[3])
-        
-        if overlap:
-            print("SUCCESS: Raster bounds overlap with San Diego County bounds.")
-        else:
-            print("FAILED: Raster bounds do not overlap with San Diego County bounds.")
-
     except Exception as e:
-        print(f"FAILED: Error opening/checking file: {e}")
+        print(f"FAILED: Could not load SD shapefile: {e}")
+        return
+
+    passed_count = 0
+    failed_count = 0
+    
+    print("Verifying all files...")
+    for file_path in tqdm(found_files):
+        try:
+            rds = rioxarray.open_rasterio(file_path)
+            
+            # Ensure CRS matches (or project SD to raster CRS)
+            # We'll project SD to raster CRS for the check
+            if rds.rio.crs != sd_county.crs:
+                 sd_county_proj = sd_county.to_crs(rds.rio.crs)
+            else:
+                 sd_county_proj = sd_county
+            
+            sd_bounds = sd_county_proj.total_bounds
+            r_bounds = rds.rio.bounds()
+            
+            # Check overlap
+            overlap = not (r_bounds[2] < sd_bounds[0] or r_bounds[0] > sd_bounds[2] or r_bounds[3] < sd_bounds[1] or r_bounds[1] > sd_bounds[3])
+            
+            if overlap:
+                passed_count += 1
+            else:
+                print(f"FAILED: {os.path.basename(file_path)} does not overlap with San Diego County.")
+                failed_count += 1
+                
+            rds.close()
+
+        except Exception as e:
+            print(f"FAILED: Error checking {os.path.basename(file_path)}: {e}")
+            failed_count += 1
+
+    print(f"\nVerification Complete.")
+    print(f"Passed: {passed_count}")
+    print(f"Failed: {failed_count}")
 
 def main():
     # Determine number of workers
