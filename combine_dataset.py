@@ -315,34 +315,39 @@ def verify_final_output(df):
 def main():
     # 1. Load PRISM (Base)
     prism_df = load_and_process_prism()
+
+    print("PRISM Data:")
+    print(prism_df.describe())
     
     # 2. Load MTBS
     mtbs_df = load_and_process_mtbs()
+
+    # Merge PRISM and MTBS
+    combined = pd.merge(prism_df, mtbs_df, on=['lat', 'lon', 'year', 'month'], how='left')
+    del prism_df, mtbs_df
     
     # 3. Load NDVI
     ndvi_df = load_and_process_ndvi()
+
+    # Merge NDVI
+    combined = pd.merge(combined, ndvi_df, on=['lat', 'lon', 'year', 'month'], how='left')
+    del ndvi_df
     
     # 4. Load NLCD
     nlcd_df = load_and_process_nlcd()
+
+    # Merge NLCD
+    # NLCD is annual, merge on lat, lon, year
+    combined = pd.merge(combined, nlcd_df, on=['lat', 'lon', 'year'], how='left')
+    del nlcd_df
     
     # 5. Load DEM
     dem_df = load_and_process_dem()
-    
-    print("Merging datasets...")
-    
-    # Merge PRISM and MTBS
-    combined = pd.merge(prism_df, mtbs_df, on=['lat', 'lon', 'year', 'month'], how='left')
-    
-    # Merge NDVI
-    combined = pd.merge(combined, ndvi_df, on=['lat', 'lon', 'year', 'month'], how='left')
-    
-    # Merge NLCD
-    # NLCD is annual, so we merge on lat, lon, year
-    combined = pd.merge(combined, nlcd_df, on=['lat', 'lon', 'year'], how='left')
-    
+
     # Merge DEM
     # DEM is static, merge on lat, lon
     combined = pd.merge(combined, dem_df, on=['lat', 'lon'], how='left')
+    del dem_df
     
     # Verify
     verify_final_output(combined)
