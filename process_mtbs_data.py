@@ -17,7 +17,7 @@ INPUT_MTBS_PATH = Path.home() / "teams/b13-domain-2/data/mtbs_perimeter_data/mtb
 SD_COUNTY_PATH = Path("data/sd_county/sd_county.shp")
 
 # Output directory for the processed file
-OUTPUT_DIR = Path("data/mtbs_perimeter_data")
+OUTPUT_DIR = Path("data/mtbs_perimeter")
 OUTPUT_FILE = OUTPUT_DIR / "sd_mtbs_perims.shp"
 
 # Reference PRISM file for grid alignment
@@ -106,18 +106,6 @@ def rasterize_data(gdf: gpd.GeoDataFrame, reference_path: Path, output_dir: Path
         month_end = (date + pd.offsets.MonthEnd(0)).date()
         
         # Filter fires that started in this month
-        # Note: Ig_Date is datetime.date objects
-        # We need to filter based on year and month
-        
-        # Create a mask for the current month
-        # Since Ig_Date contains date objects, we can compare directly if we are careful,
-        # but it's safer to extract year/month from the objects in the column
-        
-        # Efficient way:
-        # We already know Ig_Date are date objects.
-        # Let's use a list comprehension or apply for filtering, or convert to pd.to_datetime temporarily if needed.
-        # Since the dataset is small (63 records), apply is fine.
-        
         monthly_fires = gdf[gdf['Ig_Date'].apply(lambda d: (d.year == date.year) and (d.month == date.month))]
         
         if not monthly_fires.empty:
@@ -177,36 +165,45 @@ def verify_rasterize(output_dir: Path, reference_path: Path):
     # Load reference for comparison
     ref_grid = rioxarray.open_rasterio(reference_path)
     
-    # Check a sample file (e.g., the first one)
-    sample_file = files[0]
-    try:
-        ds = rioxarray.open_rasterio(sample_file)
-        
-        # Check Shape
-        if ds.shape[-2:] != ref_grid.shape[-2:]:
-             print(f"FAILED: Shape mismatch. Output: {ds.shape[-2:]}, Reference: {ref_grid.shape[-2:]}")
-             return
+    # Check all files with progress bar
+    all_passed = True
+    for file_path in tqdm(files, desc="Verifying files"):
+        try:
+            ds = rioxarray.open_rasterio(file_path)
+            
+            # Check Shape
+            if ds.shape[-2:] != ref_grid.shape[-2:]:
+                 print(f"FAILED {file_path.name}: Shape mismatch. Output: {ds.shape[-2:]}, Reference: {ref_grid.shape[-2:]}")
+                 all_passed = False
+                 continue
 
-        # Check CRS
-        if ds.rio.crs != ref_grid.rio.crs:
-             print(f"FAILED: CRS mismatch.")
-             return
-             
-        # Check Transform (Grid alignment)
-        if ds.rio.transform() != ref_grid.rio.transform():
-             print(f"FAILED: Transform mismatch (grid misalignment).")
-             return
-             
-        # Check Values (should be 0 or 1)
-        unique_vals = np.unique(ds.values)
-        if not np.all(np.isin(unique_vals, [0, 1])):
-             print(f"FAILED: Found unexpected values in raster: {unique_vals}. Expected only 0 and 1.")
-             return
-             
-        print(f"SUCCESS: Raster verification passed. Checked {len(files)} files. Grid matches PRISM 800m.")
-        
-    except Exception as e:
-        print(f"FAILED: Error verifying raster: {e}")
+            # Check CRS
+            if ds.rio.crs != ref_grid.rio.crs:
+                 print(f"FAILED {file_path.name}: CRS mismatch.")
+                 all_passed = False
+                 continue
+                 
+            # Check Transform (Grid alignment)
+            if ds.rio.transform() != ref_grid.rio.transform():
+                 print(f"FAILED {file_path.name}: Transform mismatch (grid misalignment).")
+                 all_passed = False
+                 continue
+                 
+            # Check Values (should be 0 or 1)
+            unique_vals = np.unique(ds.values)
+            if not np.all(np.isin(unique_vals, [0, 1])):
+                 print(f"FAILED {file_path.name}: Found unexpected values in raster: {unique_vals}. Expected only 0 and 1.")
+                 all_passed = False
+                 continue
+                 
+        except Exception as e:
+            print(f"FAILED {file_path.name}: Error verifying raster: {e}")
+            all_passed = False
+    
+    if all_passed:
+        print(f"SUCCESS: Raster verification passed. All {len(files)} files match PRISM 800m grid.")
+    else:
+        print("Verification finished with errors.")
 
 
 def verify_county(gdf: gpd.GeoDataFrame, sd_county: gpd.GeoDataFrame):
@@ -286,28 +283,27 @@ def main():
     sd_county = gpd.read_file(SD_COUNTY_PATH)
     print(f"Loaded SD County boundary. CRS: {sd_county.crs}")
 
-    # 4. Process Flow
-    # Step A: Clip to County
+    # 4. Clip to County
     clipped_gdf = filter_county(INPUT_MTBS_PATH, sd_county)
     
-    # Step B: Verify Spatial Overlap
+    # 5. Verify Spatial Overlap
     verify_county(clipped_gdf, sd_county)
     
     if clipped_gdf.empty:
         print("Stopping due to empty clipped dataset.")
         return
 
-    # Step C: Filter Data
+    # 6. Filter Data
     filtered_gdf = filter_data(clipped_gdf)
     
-    # Step D: Verify Final Output
+    # 7. Verify Final Output
     verify_output(filtered_gdf)
     
-    # Step E: Rasterize
+    # 8. Rasterize
     if not filtered_gdf.empty:
         rasterize_data(filtered_gdf, PRISM_REF_PATH, OUTPUT_DIR)
         
-        # Step F: Verify Rasterization
+        # 9. Verify Rasterization
         verify_rasterize(OUTPUT_DIR, PRISM_REF_PATH)
         
     else:

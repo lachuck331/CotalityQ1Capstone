@@ -10,7 +10,7 @@ import rasterio
 
 # Constants
 INPUT_DIR = Path.home() / "teams/b13-domain-2/data/nasa_ndvi"
-OUTPUT_DIR = Path("data/nasa_ndvi_800m")
+OUTPUT_DIR = Path("data/nasa_ndvi")
 PRISM_REF_PATH = Path("data/prism_climate/ppt/sd_prism_ppt_us_30s_200201.nc")
 SD_COUNTY_PATH = Path("data/sd_county/sd_county.shp")
 

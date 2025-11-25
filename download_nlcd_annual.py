@@ -152,23 +152,19 @@ def verify_nlcd_output(nlcd_outputs: list[xr.DataArray], prism: xr.DataArray, sd
     
     print(f"\nFound {len(nlcd_outputs)} processed NLCD file(s).")
     
-    for i, nlcd in enumerate(nlcd_outputs, 1):
-        print(f"\n[{i}/{len(nlcd_outputs)}] Verifying {nlcd.name or 'file ' + str(i)}...")
+    for i, nlcd in enumerate(tqdm(nlcd_outputs, desc="Verifying NLCD outputs"), 1):
+        # print(f"\n[{i}/{len(nlcd_outputs)}] Verifying {nlcd.name or 'file ' + str(i)}...")
         
         try:            
             # Check shape match
             if nlcd.shape != prism.shape:
                 print(f"  ✗ Shape mismatch: {nlcd.shape} != {prism.shape}")
                 all_passed = False
-            else:
-                print(f"  ✓ Shape matches: {nlcd.shape}")
             
             # Check CRS match
             if nlcd.rio.crs != prism.rio.crs:
                 print(f"  ✗ CRS mismatch: {nlcd.rio.crs} != {prism.rio.crs}")
                 all_passed = False
-            else:
-                print(f"  ✓ CRS matches: {nlcd.rio.crs}")
             
             # Check spatial overlap with SD County
             if sd_county is not None:
@@ -183,9 +179,7 @@ def verify_nlcd_output(nlcd_outputs: list[xr.DataArray], prism: xr.DataArray, sd
                     nlcd_bounds[1] > sd_bounds[3]
                 )
                 
-                if overlap:
-                    print(f"  ✓ Overlaps with SD County")
-                else:
+                if not overlap:
                     print(f"  ✗ No spatial overlap with SD County")
                     all_passed = False
             
