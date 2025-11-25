@@ -2,6 +2,12 @@ import geopandas as gpd
 import pandas as pd
 from pathlib import Path
 import os
+import rioxarray
+import xarray as xr
+import numpy as np
+import rasterio
+from rasterio import features
+from tqdm import tqdm
 
 # Constants
 # Input path for the MTBS Perimeter data (Vector Shapefile)
@@ -14,6 +20,13 @@ SD_COUNTY_PATH = Path("data/sd_county/sd_county.shp")
 OUTPUT_DIR = Path("data/mtbs_perimeter_data")
 OUTPUT_FILE = OUTPUT_DIR / "sd_mtbs_perims.shp"
 
+# Reference PRISM file for grid alignment
+PRISM_REF_PATH = Path("data/prism_climate/ppt/sd_prism_ppt_us_30s_200001.nc")
+
+# Date Range Constants
+START_YEAR = 2000
+END_YEAR = 2024
+
 def filter_county(input_path: Path, sd_county: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     """
     Load the MTBS perimeter file and clip it to San Diego County.
@@ -22,15 +35,14 @@ def filter_county(input_path: Path, sd_county: gpd.GeoDataFrame) -> gpd.GeoDataF
     mtbs_data = gpd.read_file(input_path)
     print(f"Loaded {len(mtbs_data)} fire perimeters. CRS: {mtbs_data.crs} from {input_path}")
 
-    # Reproject
-    # To clip correctly, both datasets must be in the same Coordinate Reference System (CRS).
+    # Reproject if different CRS
     if mtbs_data.crs != sd_county.crs:
         print("CRS mismatch. Reprojecting MTBS data to match SD County...")
         mtbs_data = mtbs_data.to_crs(sd_county.crs)
     else:
         print("CRS matches. No reprojection needed.")
 
-    # Clip
+    # Clip to SD County
     print("Clipping MTBS data to San Diego County...")
     mtbs_clipped = gpd.clip(mtbs_data, sd_county)
     
@@ -44,15 +56,15 @@ def filter_county(input_path: Path, sd_county: gpd.GeoDataFrame) -> gpd.GeoDataF
 
 def filter_data(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     """
-    Filter the MTBS dataset to events between 2000-2024 and labeled as 'Wildfire'.
+    Filter the MTBS dataset to events between START_YEAR-END_YEAR and labeled as 'Wildfire'.
     """
-    print("Filtering data by date (2000-2024) and type (Wildfire)...")
+    print(f"Filtering data by date ({START_YEAR}-{END_YEAR}) and type (Wildfire)...")
     
     # Ensure Ig_Date is datetime
     gdf['Ig_Date'] = pd.to_datetime(gdf['Ig_Date'])
     
-    # Filter by year between 2000 and 2024
-    date_filter = (gdf['Ig_Date'].dt.year >= 2000) & (gdf['Ig_Date'].dt.year <= 2024)
+    # Filter by year between START_YEAR and END_YEAR
+    date_filter = (gdf['Ig_Date'].dt.year >= START_YEAR) & (gdf['Ig_Date'].dt.year <= END_YEAR)
     
     # Filter by Incident Type equals 'Wildfire'
     type_filter = gdf['Incid_Type'] == 'Wildfire'
@@ -65,6 +77,136 @@ def filter_data(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     
     print(f"Filtering complete. Reduced from {len(gdf)} to {len(filtered_gdf)} records.")
     return filtered_gdf
+
+
+def rasterize_data(gdf: gpd.GeoDataFrame, reference_path: Path, output_dir: Path):
+    """
+    Rasterize the filtered MTBS data to the 800m PRISM grid for each month.
+    """
+    print("\nRasterizing data to 800m grid...")
+    
+    if not reference_path.exists():
+        print(f"ERROR: Reference grid not found at {reference_path}")
+        return
+
+    # Load reference grid to get transform and shape
+    ref_grid = rioxarray.open_rasterio(reference_path)
+    out_shape = ref_grid.shape[-2:] # (height, width)
+    transform = ref_grid.rio.transform()
+    crs = ref_grid.rio.crs
+    
+    # Create monthly date range
+    dates = pd.date_range(start=f'{START_YEAR}-01-01', end=f'{END_YEAR}-12-31', freq='MS')
+    
+    print(f"Processing {len(dates)} months...")
+    
+    for date in tqdm(dates):
+        # Define the month's range
+        month_start = date.date()
+        month_end = (date + pd.offsets.MonthEnd(0)).date()
+        
+        # Filter fires that started in this month
+        # Note: Ig_Date is datetime.date objects
+        # We need to filter based on year and month
+        
+        # Create a mask for the current month
+        # Since Ig_Date contains date objects, we can compare directly if we are careful,
+        # but it's safer to extract year/month from the objects in the column
+        
+        # Efficient way:
+        # We already know Ig_Date are date objects.
+        # Let's use a list comprehension or apply for filtering, or convert to pd.to_datetime temporarily if needed.
+        # Since the dataset is small (63 records), apply is fine.
+        
+        monthly_fires = gdf[gdf['Ig_Date'].apply(lambda d: (d.year == date.year) and (d.month == date.month))]
+        
+        if not monthly_fires.empty:
+            # Rasterize
+            # shapes must be (geometry, value) or just geometry (if default_value used)
+            shapes = [(geom, 1) for geom in monthly_fires.geometry]
+            
+            raster = features.rasterize(
+                shapes=shapes,
+                out_shape=out_shape,
+                transform=transform,
+                fill=0,
+                default_value=1,
+                dtype=np.uint8
+            )
+        else:
+            # Create empty grid
+            raster = np.zeros(out_shape, dtype=np.uint8)
+            
+        # Save as NetCDF
+        # Create xarray DataArray
+        da = xr.DataArray(
+            raster[np.newaxis, :, :], # Add band dimension
+            coords={
+                'band': [1],
+                'y': ref_grid.y,
+                'x': ref_grid.x
+            },
+            dims=('band', 'y', 'x'),
+            attrs=ref_grid.attrs
+        )
+        
+        da.rio.write_crs(crs, inplace=True)
+        da.rio.write_transform(transform, inplace=True)
+        
+        output_filename = f"sd_mtbs_800m_{date.strftime('%Y%m')}.nc"
+        da.to_netcdf(output_dir / output_filename)
+        
+    print(f"Rasterization complete. Saved {len(dates)} files to {output_dir}")
+
+
+def verify_rasterize(output_dir: Path, reference_path: Path):
+    """
+    Verify the rasterized outputs.
+    """
+    print("\nVerifying rasterized outputs...")
+    
+    if not output_dir.exists():
+        print(f"FAILED: Output directory {output_dir} does not exist.")
+        return
+        
+    files = list(output_dir.glob("*.nc"))
+    if not files:
+        print("FAILED: No NetCDF files found in output directory.")
+        return
+        
+    # Load reference for comparison
+    ref_grid = rioxarray.open_rasterio(reference_path)
+    
+    # Check a sample file (e.g., the first one)
+    sample_file = files[0]
+    try:
+        ds = rioxarray.open_rasterio(sample_file)
+        
+        # Check Shape
+        if ds.shape[-2:] != ref_grid.shape[-2:]:
+             print(f"FAILED: Shape mismatch. Output: {ds.shape[-2:]}, Reference: {ref_grid.shape[-2:]}")
+             return
+
+        # Check CRS
+        if ds.rio.crs != ref_grid.rio.crs:
+             print(f"FAILED: CRS mismatch.")
+             return
+             
+        # Check Transform (Grid alignment)
+        if ds.rio.transform() != ref_grid.rio.transform():
+             print(f"FAILED: Transform mismatch (grid misalignment).")
+             return
+             
+        # Check Values (should be 0 or 1)
+        unique_vals = np.unique(ds.values)
+        if not np.all(np.isin(unique_vals, [0, 1])):
+             print(f"FAILED: Found unexpected values in raster: {unique_vals}. Expected only 0 and 1.")
+             return
+             
+        print(f"SUCCESS: Raster verification passed. Checked {len(files)} files. Grid matches PRISM 800m.")
+        
+    except Exception as e:
+        print(f"FAILED: Error verifying raster: {e}")
 
 
 def verify_county(gdf: gpd.GeoDataFrame, sd_county: gpd.GeoDataFrame):
@@ -111,10 +253,10 @@ def verify_output(gdf: gpd.GeoDataFrame):
 
     # Check Filters
     years = gdf['Ig_Date'].apply(lambda d: d.year)
-    invalid_dates = gdf[~((years >= 2000) & (years <= 2024))]
+    invalid_dates = gdf[~((years >= START_YEAR) & (years <= END_YEAR))]
     
     if not invalid_dates.empty:
-        print(f"FAILED: Found {len(invalid_dates)} records outside date range 2000-2024.")
+        print(f"FAILED: Found {len(invalid_dates)} records outside date range {START_YEAR}-{END_YEAR}.")
         return
 
     invalid_types = gdf[gdf['Incid_Type'] != 'Wildfire']
@@ -161,13 +303,15 @@ def main():
     # Step D: Verify Final Output
     verify_output(filtered_gdf)
     
-    # Step E: Save
+    # Step E: Rasterize
     if not filtered_gdf.empty:
-        print(f"Saving to {OUTPUT_FILE}...")
-        filtered_gdf.to_file(OUTPUT_FILE)
-        print("Done.")
+        rasterize_data(filtered_gdf, PRISM_REF_PATH, OUTPUT_DIR)
+        
+        # Step F: Verify Rasterization
+        verify_rasterize(OUTPUT_DIR, PRISM_REF_PATH)
+        
     else:
-        print("Final dataset is empty. Nothing to save.")
+        print("Final dataset is empty. Nothing to rasterize.")
 
 
 if __name__ == "__main__":
