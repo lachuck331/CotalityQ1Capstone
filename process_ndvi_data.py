@@ -7,6 +7,7 @@ from tqdm import tqdm
 import numpy as np
 from shapely.geometry import mapping
 import rasterio
+from datetime import datetime, timedelta
 
 # Constants
 INPUT_DIR = Path.home() / "teams/b13-domain-2/data/nasa_ndvi"
@@ -37,9 +38,19 @@ def process_file(file_path: Path, reference_grid: xr.DataArray, sd_county: gpd.G
         )
         
         # Construct output filename
+        # Format: MOD13A3.061__1_km_monthly_NDVI_doy2000032000000_aid0001.tif
         parts = file_path.name.split('_')
         doy_part = [p for p in parts if p.startswith('doy')][0]
-        date_str = doy_part[3:10] 
+        if doy_part:
+            date_part = doy_part[3:10] # 2000032
+            year = int(date_part[0:4])
+            if year < 2000 or year > 2024:
+                raise ValueError(f"Filename {file_path.name} does not match expected MODIS format.")
+            doy = int(date_part[4:])
+            date_obj = datetime(year, 1, 1) + timedelta(days=doy - 1)
+            date_str = date_obj.strftime("%Y-%m-%d")
+        else:
+            raise ValueError(f"Filename {file_path.name} does not match expected MODIS format.")
         
         output_filename = f"sd_ndvi_800m_{date_str}.nc"
         output_path = output_dir / output_filename
@@ -54,14 +65,13 @@ def verify_outputs(output_dir: Path, reference_grid: xr.DataArray):
     """
     Verify all generated files in output_dir.
     """
-    print("\nVerifying outputs...")
     files = list(output_dir.glob("*.nc"))
     if not files:
-        print("FAILED: No output files found.")
+        print("FAILED to verify outputs: No output files found.")
         return
 
     all_passed = True
-    for file_path in files:
+    for file_path in tqdm(files, desc="Verifying output files"):
         try:
             ds = rioxarray.open_rasterio(file_path)
             
@@ -115,7 +125,7 @@ def main():
     sd_county = gpd.read_file(SD_COUNTY_PATH)
 
     # Find input files
-    input_files = list(INPUT_DIR.glob("*NDVI*.tif"))
+    input_files = list(INPUT_DIR.glob("MOD13A3*NDVI*.tif"))
     print(f"Found {len(input_files)} NDVI files to process.")
 
     total_files = len(input_files)
