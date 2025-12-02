@@ -12,6 +12,7 @@ dependencies = [
     "rasterio>=1.4.3",
     "rioxarray>=0.20.0",
     "scipy>=1.16.3",
+    "seaborn>=0.13.2",
     "tqdm>=4.67.1",
     "xarray>=2025.11.0",
 ]

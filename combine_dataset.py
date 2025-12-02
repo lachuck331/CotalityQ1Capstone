@@ -14,7 +14,7 @@ NLCD_DIR = DATA_DIR / "nlcd_annual"
 DEM_DIR = DATA_DIR / "usgs_dem"
 OUTPUT_FILE = DATA_DIR / "combined_data.parquet"
 START_YEAR = 2000
-END_YEAR = 2002
+END_YEAR = 2024
 
 def get_prism_files(var_name):
     """
