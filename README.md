@@ -78,10 +78,10 @@ If you prefer a different location, create the directory and adjust the scripts 
 
 
 ```bash
-python download_sd_county.py      # downloads or ensures San Diego County shapefiles
-python download_prism_data.py    # downloads PRISM monthly climate data
-python download_nlcd_annual.py   # downloads NLCD annual rasters
-python download_mtbs_data.py     # (if present) downloads MTBS dataset or subset
+python download_sd_county.py     
+python download_prism_data.py    
+python download_nlcd_annual.py   
+python download_mtbs_data.py     
 ```
 
 Note: Some datasets are hosted by third parties and may require a stable network connection, a data account, or acceptance of license terms. Inspect the top of each download script for notes about authentication or remote URLs.
@@ -89,10 +89,10 @@ Note: Some datasets are hosted by third parties and may require a stable network
 After downloads, run the processing scripts to create uniform, analysis-ready layers on the target grid:
 
 ```bash
-python process_dem_data.py       # compute slope/aspect and resample/upscale DEM
-python process_ndvi_data.py      # regrid MODIS NDVI to the PRISM 800 m grid
-python process_mtbs_data.py      # subset & rasterize MTBS perimeters to monthly 800m grid
-python combine_dataset.py        # combine predictors + target into analysis-ready dataset
+python process_dem_data.py       
+python process_ndvi_data.py      
+python process_mtbs_data.py      
+python combine_dataset.py        
 ```
 
 ## Software dependencies
@@ -101,10 +101,10 @@ python combine_dataset.py        # combine predictors + target into analysis-rea
 Recommended steps (Conda, preferred for geospatial stacks):
 
 ```bash
-# Create the environment (name it as you like)
+
 conda env create -f environment.yml -n cotality-capstone-q1
 conda activate cotality-capstone-q1
-# Install this project in editable mode (optional, if the package has an installable layout)
+
 pip install -e .
 ```
 
@@ -119,13 +119,13 @@ Commonly required packages (non-exhaustive): `numpy`, `pandas`, `xarray`, `raste
 2) Download and prepare the data (run scripts in order):
 
 ```bash
-# From repo root
+
 python download_sd_county.py
 python download_prism_data.py
 python download_nlcd_annual.py
-python download_mtbs_data.py   # if present; otherwise examine process_mtbs_data.py for instructions
+python download_mtbs_data.py   
 
-# Then preprocess / regrid / combine
+
 python process_dem_data.py
 python process_ndvi_data.py
 python process_mtbs_data.py
@@ -143,25 +143,11 @@ jupyter notebook
 
 
 ```bash
-# Execute notebook with nbconvert
 jupyter nbconvert --to notebook --execute model.ipynb --output executed_model.ipynb
 
-# Or use papermill to run and parameterize notebooks (install papermill first)
 papermill model.ipynb executed_model.ipynb
 ```
 
 4) Output & results
 
 
-## Tips and notes
-
-
-## Next steps (optional)
-
-
-
-If you want, I can also:
-
-Ask which of these you'd like me to prepare next.
-
-```
