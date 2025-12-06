@@ -1,7 +1,7 @@
-# Cotality: Q1 Capstone 
-_Lacha Barton-Gluzman, Stuti Verma, Diego Arevalo, Gahn Wuwong_
+```markdown
+```markdown
 
-Mentor: _Ilyes Meftah_
+Mentors: _Ilyes Meftah_
 
 Traditional wildfire burn probability assessment relies heavily on expensive physical fire spread model simulations, static fuel cover, and outdated historical ignitions. This project will explore whether we can estimate historical fire burn probabilities using widely available and dynamic geospatial, vegetation, topographic, and weather data instead. Using historical wildfire perimeter data from the Monitoring Trends in Burn Severity (MTBS) program for San Diego County, we will replicate and adapt the statistical methods presented in Climate Risks From Stress, Insects and Fire Across US Forests. (1). Model performance will be evaluated through cross-validation and out-of-sample testing (2005–2009), followed by spatial mapping of ensemble burn probabilities and an assessment of structures at risk. The resulting framework aims to provide a cost-efficient, reproducible method for local wildfire risk assessment and real-time resilience planning. 
 
@@ -58,3 +58,110 @@ We will use the following six data sources, classified as either Training, Predi
     <li> a. Use open street map dataset
     <li>b. Construct an exceedance probability curve for the 800m grid cell
     </ol>
+
+
+## How to run this repository
+
+**Overview:** This repo contains data download and pre-processing scripts, exploratory notebooks, and model notebooks to reproduce the Capstone analysis. The instructions below describe how to fetch and store data, install dependencies, and run the scripts and notebooks in the intended order.
+
+**Data storage (where files go):**
+  - `data/sd_county/` : San Diego County shapefiles (already present in repo for convenience)
+  - `data/prism/` : PRISM monthly climate files
+  - `data/nlcd/` : NLCD annual landcover files
+  - `data/mtbs/` : MTBS fire perimeter data
+  - `data/dem/` : DEM tiles and derived slope/aspect
+  - `data/ndvi/` : MODIS NDVI tiles or regridded outputs
+
+If you prefer a different location, create the directory and adjust the scripts or environment variables inside scripts to point to your path.
+
+## Accessing the data
+
+
+```bash
+python download_sd_county.py      # downloads or ensures San Diego County shapefiles
+python download_prism_data.py    # downloads PRISM monthly climate data
+python download_nlcd_annual.py   # downloads NLCD annual rasters
+python download_mtbs_data.py     # (if present) downloads MTBS dataset or subset
+```
+
+Note: Some datasets are hosted by third parties and may require a stable network connection, a data account, or acceptance of license terms. Inspect the top of each download script for notes about authentication or remote URLs.
+
+After downloads, run the processing scripts to create uniform, analysis-ready layers on the target grid:
+
+```bash
+python process_dem_data.py       # compute slope/aspect and resample/upscale DEM
+python process_ndvi_data.py      # regrid MODIS NDVI to the PRISM 800 m grid
+python process_mtbs_data.py      # subset & rasterize MTBS perimeters to monthly 800m grid
+python combine_dataset.py        # combine predictors + target into analysis-ready dataset
+```
+
+## Software dependencies
+
+
+Recommended steps (Conda, preferred for geospatial stacks):
+
+```bash
+# Create the environment (name it as you like)
+conda env create -f environment.yml -n cotality-capstone-q1
+conda activate cotality-capstone-q1
+# Install this project in editable mode (optional, if the package has an installable layout)
+pip install -e .
+```
+
+If you don't use conda, create and activate a virtualenv and install dependencies via `pip`. There is no `requirements.txt` in the repo; instead, use the `pyproject.toml` or inspect `environment.yml` to determine the packages to `pip install`.
+
+Commonly required packages (non-exhaustive): `numpy`, `pandas`, `xarray`, `rasterio`, `geopandas`, `shapely`, `rioxarray`, `scipy`, `scikit-learn`, `matplotlib`, `pyproj`, `jupyterlab`, `notebook`, and other geospatial utilities. Some optional/modeling packages used in experimentation include `pygam` (installed earlier in this environment) and statistical modelling packages referenced in the notebooks.
+
+## Reproduce results (commands)
+
+1) Prepare environment (see previous section).
+
+2) Download and prepare the data (run scripts in order):
+
+```bash
+# From repo root
+python download_sd_county.py
+python download_prism_data.py
+python download_nlcd_annual.py
+python download_mtbs_data.py   # if present; otherwise examine process_mtbs_data.py for instructions
+
+# Then preprocess / regrid / combine
+python process_dem_data.py
+python process_ndvi_data.py
+python process_mtbs_data.py
+python combine_dataset.py
+```
+
+3) Exploratory analysis and modeling
+
+
+```bash
+jupyter lab
+# or
+jupyter notebook
+```
+
+
+```bash
+# Execute notebook with nbconvert
+jupyter nbconvert --to notebook --execute model.ipynb --output executed_model.ipynb
+
+# Or use papermill to run and parameterize notebooks (install papermill first)
+papermill model.ipynb executed_model.ipynb
+```
+
+4) Output & results
+
+
+## Tips and notes
+
+
+## Next steps (optional)
+
+
+
+If you want, I can also:
+
+Ask which of these you'd like me to prepare next.
+
+```
