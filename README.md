@@ -60,7 +60,7 @@ We will use the following six data sources, classified as either Training, Predi
     </ol>
 
 
-## How to run this repository
+## Instructions
 
 **Overview:** This repo contains data download and pre-processing scripts, exploratory notebooks, and model notebooks to reproduce the Capstone analysis. The instructions below describe how to fetch and store data, install dependencies, and run the scripts and notebooks in the intended order.
 
@@ -110,7 +110,7 @@ pip install -e .
 
 If you don't use conda, create and activate a virtualenv and install dependencies via `pip`. There is no `requirements.txt` in the repo; instead, use the `pyproject.toml` or inspect `environment.yml` to determine the packages to `pip install`.
 
-Commonly required packages (non-exhaustive): `numpy`, `pandas`, `xarray`, `rasterio`, `geopandas`, `shapely`, `rioxarray`, `scipy`, `scikit-learn`, `matplotlib`, `pyproj`, `jupyterlab`, `notebook`, and other geospatial utilities. Some optional/modeling packages used in experimentation include `pygam` (installed earlier in this environment) and statistical modelling packages referenced in the notebooks.
+Commonly required packages (non-exhaustive): `numpy`, `pandas`, `xarray`, `rasterio`, `geopandas`, `shapely`, `rioxarray`, `scipy`, `scikit-learn`, `matplotlib`, `pyproj`, `jupyterlab`, `notebook`, and other geospatial utilities. 
 
 ## Reproduce results (commands)
 
@@ -137,7 +137,7 @@ python combine_dataset.py
 
 ```bash
 jupyter lab
-# or
+
 jupyter notebook
 ```
 
@@ -148,6 +148,6 @@ jupyter nbconvert --to notebook --execute model.ipynb --output executed_model.ip
 papermill model.ipynb executed_model.ipynb
 ```
 
-4) Output & results
+
 
 
