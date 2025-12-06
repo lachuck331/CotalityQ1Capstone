@@ -1,13 +1,25 @@
 name: cotality-capstone-q1
 channels:
+  - conda-forge
   - defaults
 dependencies:
-  - python=3.13
+  - python=3.11
+  - geopandas
+  - rasterio
+  - rioxarray
   - xarray
   - pyproj
   - requests
-  - geopandas
   - shapely
-  - rasterio
-  - rioxarray
-prefix: C:\Users\lacha laptop\anaconda3\envs\cotality-capstone-q1
+  - matplotlib
+  - nbformat
+  - netcdf4
+  - plotly
+  - pyarrow
+  - scikit-learn
+  - scipy
+  - seaborn
+  - tqdm
+  - pip
+
+
