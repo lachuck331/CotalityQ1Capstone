@@ -20,15 +20,15 @@ DATA_TYPES = ["tmax", "tdmean", "vpdmax", "ppt"]
 # Output directory
 DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data")
 OUTPUT_DIR = os.path.join(DATA_DIR, "prism_climate")
-SD_SHAPEFILE_PATH = os.path.join(DATA_DIR, "sd_county", "sd_county.shp")
+CA_SHAPEFILE_PATH = os.path.join(DATA_DIR, "ca_state", "ca_state.shp")
 
 START_YEAR = 2000
 END_YEAR = 2024
 
-def download_and_process_prism_data(start_year, end_year, sd_county, worker_id=0):
+def download_and_process_prism_data(start_year, end_year, ca_state, worker_id=0):
     """
     Downloads PRISM climate data for years 1999-2024 and months 1-12.
-    Subsets the data to San Diego County immediately after download.
+    Subsets the data to California immediately after download.
     """
     # Calculate total downloads
     total_years = end_year - start_year + 1
@@ -52,7 +52,7 @@ def download_and_process_prism_data(start_year, end_year, sd_county, worker_id=0
                     filepath = os.path.join(OUTPUT_DIR, filename)
                     
                     # Target subset file path
-                    output_filename = f"sd_prism_{dtype}_us_30s_{date_str}.nc"
+                    output_filename = f"ca_prism_{dtype}_us_30s_{date_str}.nc"
                     output_path = os.path.join(OUTPUT_DIR, dtype, output_filename)
 
                     try:
@@ -99,14 +99,14 @@ def download_and_process_prism_data(start_year, end_year, sd_county, worker_id=0
                                 # Open raster
                                 rds = rioxarray.open_rasterio(nc_file)
                                 
-                                if rds.rio.crs != sd_county.crs:
-                                    # It's better to project the vector to the raster CRS to avoid warping the raster grid
-                                    sd_county_proj = sd_county.to_crs(rds.rio.crs)
+                                # Ensure CRS matches (ca_state is passed in, assume it's correct or check once)
+                                if rds.rio.crs != ca_state.crs:
+                                    ca_state_proj = ca_state.to_crs(rds.rio.crs)
                                 else:
-                                    sd_county_proj = sd_county
+                                    ca_state_proj = ca_state
 
                                 # Clip
-                                clipped = rds.rio.clip(sd_county_proj.geometry.apply(mapping), sd_county_proj.crs)
+                                clipped = rds.rio.clip(ca_state_proj.geometry.apply(mapping), ca_state_proj.crs)
                                 
                                 # Save subset
                                 clipped.to_netcdf(output_path)
@@ -150,25 +150,26 @@ def verify_prism_output():
     for root, dirs, files in os.walk(OUTPUT_DIR):
         for file in files:
             full_path = os.path.join(root, file)
-            if file.endswith(".nc"):
+            # Check for ca_prism prefix to only verify CA files
+            if file.endswith(".nc") and file.startswith("ca_prism"):
                 found_files.append(full_path)
             elif any(file.endswith(ext) for ext in DELETE_EXTENSIONS):
                 os.remove(full_path)
                 delete_count += 1
 
     if not found_files:
-        print("FAILED: No subsetted NetCDF files found.")
+        print("FAILED: No subsetted NetCDF files found (looking for ca_prism*.nc).")
         return
     
     print(f"Found {len(found_files)} subsetted files.")
     print(f"Deleted {delete_count} files.")
     
-    # Load SD shapefile once for comparison
-    sd_shapefile_path = os.path.join("data", "sd_county", "sd_county.shp")
+    # Load CA shapefile once for comparison
+    ca_shapefile_path = os.path.join("data", "ca_state", "ca_state.shp")
     try:
-        sd_county = gpd.read_file(sd_shapefile_path)
+        ca_state = gpd.read_file(ca_shapefile_path)
     except Exception as e:
-        print(f"FAILED: Could not load SD shapefile: {e}")
+        print(f"FAILED: Could not load CA shapefile: {e}")
         return
 
     passed_count = 0
@@ -179,23 +180,24 @@ def verify_prism_output():
         try:
             rds = rioxarray.open_rasterio(file_path)
             
-            # Ensure CRS matches (or project SD to raster CRS)
-            # We'll project SD to raster CRS for the check
-            if rds.rio.crs != sd_county.crs:
-                 sd_county_proj = sd_county.to_crs(rds.rio.crs)
+            # Ensure CRS matches (or project CA to raster CRS)
+            # We'll project CA to raster CRS for the check
+            if rds.rio.crs != ca_state.crs:
+                 ca_state_proj = ca_state.to_crs(rds.rio.crs)
             else:
-                 sd_county_proj = sd_county
+                 ca_state_proj = ca_state
             
-            sd_bounds = sd_county_proj.total_bounds
+            # Use total_bounds for quick overlap check
+            ca_bounds = ca_state_proj.total_bounds
             r_bounds = rds.rio.bounds()
             
             # Check overlap
-            overlap = not (r_bounds[2] < sd_bounds[0] or r_bounds[0] > sd_bounds[2] or r_bounds[3] < sd_bounds[1] or r_bounds[1] > sd_bounds[3])
+            overlap = not (r_bounds[2] < ca_bounds[0] or r_bounds[0] > ca_bounds[2] or r_bounds[3] < ca_bounds[1] or r_bounds[1] > ca_bounds[3])
             
             if overlap:
                 passed_count += 1
             else:
-                print(f"FAILED: {os.path.basename(file_path)} does not overlap with San Diego County.")
+                print(f"FAILED: {os.path.basename(file_path)} does not overlap with California.")
                 failed_count += 1
                 
             rds.close()
@@ -225,13 +227,13 @@ def main():
     for dtype in DATA_TYPES:
         os.makedirs(os.path.join(OUTPUT_DIR, dtype), exist_ok=True)
 
-    # Load San Diego shapefile ONCE
-    if not os.path.exists(SD_SHAPEFILE_PATH):
-        print(f"Error: San Diego shapefile not found at {SD_SHAPEFILE_PATH}")
+    # Load California shapefile ONCE
+    if not os.path.exists(CA_SHAPEFILE_PATH):
+        print(f"Error: California shapefile not found at {CA_SHAPEFILE_PATH}")
         return
     
-    print("Loading San Diego shapefile...")
-    sd_county = gpd.read_file(SD_SHAPEFILE_PATH)
+    print("Loading California shapefile...")
+    ca_state = gpd.read_file(CA_SHAPEFILE_PATH)
 
     # Calculate years per worker
     years_per_worker = total_years // num_workers
@@ -246,8 +248,8 @@ def main():
             count = years_per_worker + (1 if i < remainder else 0)
             current_end_year = current_start_year + count - 1
             
-            # Submit task - Pass sd_county
-            futures.append(executor.submit(download_and_process_prism_data, current_start_year, current_end_year, sd_county, i))
+            # Submit task - Pass ca_state
+            futures.append(executor.submit(download_and_process_prism_data, current_start_year, current_end_year, ca_state, i))
             
             current_start_year = current_end_year + 1
 
@@ -261,6 +263,6 @@ def main():
     verify_prism_output()
 
 if __name__ == "__main__":
-    print("Starting PRISM data download and processing...")
+    print("Starting PRISM data download and processing for California...")
     main()
     print("All operations complete.")
