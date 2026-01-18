@@ -6,7 +6,7 @@ import re
 from tqdm import tqdm
 
 # Constants
-DATA_DIR = Path("data")
+DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 PRISM_DIR = DATA_DIR / "prism_climate"
 MTBS_DIR = DATA_DIR / "mtbs_perimeter"
 NDVI_DIR = DATA_DIR / "nasa_ndvi"

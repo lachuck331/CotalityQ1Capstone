@@ -4,7 +4,7 @@ from pathlib import Path
 import geopandas as gpd
 import shutil
 
-def download_census_county_data(output_dir="data/sd_county"):
+def download_census_county_data(output_dir=None):
     """
     Download and extract US county shapefile data from Census Bureau,
     then filter for San Diego County.
@@ -12,8 +12,12 @@ def download_census_county_data(output_dir="data/sd_county"):
     Parameters:
     -----------
     output_dir : str
-        Directory where the data will be saved (default: "data/sd_county")
+        Directory where the data will be saved (default: "data/sd_county" relative to project root)
     """
+    if output_dir is None:
+        DATA_DIR = Path(__file__).resolve().parent.parent / "data"
+        output_dir = DATA_DIR / "sd_county"
+
     # URL for the 2025 US County shapefile
     url = "https://www2.census.gov/geo/tiger/TIGER2025/COUNTY/tl_2025_us_county.zip"
     

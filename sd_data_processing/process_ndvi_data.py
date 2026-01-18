@@ -10,10 +10,12 @@ import rasterio
 from datetime import datetime, timedelta
 
 # Constants
+# Constants
+DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 INPUT_DIR = Path.home() / "teams/b13-domain-2/data/nasa_ndvi"
-OUTPUT_DIR = Path("data/nasa_ndvi")
-PRISM_REF_PATH = Path("data/prism_climate/ppt/sd_prism_ppt_us_30s_200201.nc")
-SD_COUNTY_PATH = Path("data/sd_county/sd_county.shp")
+OUTPUT_DIR = DATA_DIR / "nasa_ndvi"
+PRISM_REF_PATH = DATA_DIR / "prism_climate" / "ppt" / "sd_prism_ppt_us_30s_200201.nc"
+SD_COUNTY_PATH = DATA_DIR / "sd_county" / "sd_county.shp"
 
 def process_file(file_path: Path, reference_grid: xr.DataArray, sd_county: gpd.GeoDataFrame, output_dir: Path):
     """

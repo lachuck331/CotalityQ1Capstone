@@ -14,9 +14,10 @@ import shutil
 BASE_URL = "https://www.mrlc.gov/downloads/sciweb1/shared/mrlc/data-bundles"
 START_YEAR = 2000
 END_YEAR = 2024
-OUTPUT_DIR = Path("data/nlcd_annual")
-SD_COUNTY = Path("data/sd_county/sd_county.shp")
-PRISM_PATH = Path("data/prism_climate/ppt/sd_prism_ppt_us_30s_200201.nc")
+DATA_DIR = Path(__file__).resolve().parent.parent / "data"
+OUTPUT_DIR = DATA_DIR / "nlcd_annual"
+SD_COUNTY = DATA_DIR / "sd_county" / "sd_county.shp"
+PRISM_PATH = DATA_DIR / "prism_climate" / "ppt" / "sd_prism_ppt_us_30s_200201.nc"
 
 # Excluded NLCD classes
 EXCLUDED_CLASSES = [11, 12, 250]  # Open Water, Perennial Snow, No Data

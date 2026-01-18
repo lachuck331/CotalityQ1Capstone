@@ -7,9 +7,11 @@ from scipy import stats
 from rioxarray.merge import merge_arrays
 
 # Constants
+# Constants
+DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 INPUT_DIR = Path.home() / "teams/b13-domain-2/data/USGS_DEM"
-OUTPUT_DIR = Path("data/usgs_dem")
-PRISM_REF_PATH = Path("data/prism_climate/ppt/sd_prism_ppt_us_30s_200001.nc")
+OUTPUT_DIR = DATA_DIR / "usgs_dem"
+PRISM_REF_PATH = DATA_DIR / "prism_climate" / "ppt" / "sd_prism_ppt_us_30s_200001.nc"
 
 def load_and_merge_dems(input_dir: Path) -> xr.DataArray:
     """Load all TIFF files in input_dir and merge them."""

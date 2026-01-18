@@ -18,8 +18,10 @@ BASE_URL = "https://services.nacse.org/prism/data/get/us/800m"
 DATA_TYPES = ["tmax", "tdmean", "vpdmax", "ppt"]
 
 # Output directory
-OUTPUT_DIR = os.path.join("data", "prism_climate")
-SD_SHAPEFILE_PATH = os.path.join("data", "sd_county", "sd_county.shp")
+# Output directory
+DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data")
+OUTPUT_DIR = os.path.join(DATA_DIR, "prism_climate")
+SD_SHAPEFILE_PATH = os.path.join(DATA_DIR, "sd_county", "sd_county.shp")
 
 START_YEAR = 2000
 END_YEAR = 2024

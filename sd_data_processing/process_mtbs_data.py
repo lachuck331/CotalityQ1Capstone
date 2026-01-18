@@ -14,14 +14,15 @@ from tqdm import tqdm
 INPUT_MTBS_PATH = Path.home() / "teams/b13-domain-2/data/mtbs_perimeter_data/mtbs_perims_DD.shp"
 
 # Path to the San Diego County shapefile (used as the clipping mask)
-SD_COUNTY_PATH = Path("data/sd_county/sd_county.shp")
+DATA_DIR = Path(__file__).resolve().parent.parent / "data"
+SD_COUNTY_PATH = DATA_DIR / "sd_county" / "sd_county.shp"
 
 # Output directory for the processed file
-OUTPUT_DIR = Path("data/mtbs_perimeter")
+OUTPUT_DIR = DATA_DIR / "mtbs_perimeter"
 OUTPUT_FILE = OUTPUT_DIR / "sd_mtbs_perims.shp"
 
 # Reference PRISM file for grid alignment
-PRISM_REF_PATH = Path("data/prism_climate/ppt/sd_prism_ppt_us_30s_200001.nc")
+PRISM_REF_PATH = DATA_DIR / "prism_climate" / "ppt" / "sd_prism_ppt_us_30s_200001.nc"
 
 # Date Range Constants
 START_YEAR = 2000
