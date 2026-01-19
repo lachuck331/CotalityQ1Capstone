@@ -14,7 +14,7 @@ from shapely.prepared import prep
 # Constants
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 INPUT_DIR = DATA_DIR / "USGS_DEM"
-OUTPUT_DIR = DATA_DIR / "proc_usgs_dem"
+OUTPUT_DIR = DATA_DIR / "ca_usgs_dem"
 PRISM_REF_PATH = DATA_DIR / "prism_climate" / "ppt" / "ca_prism_ppt_us_30s_200001.nc"
 CA_STATE_PATH = DATA_DIR / "ca_state" / "ca_state.shp"
 
@@ -166,6 +166,8 @@ def verify_output(output_path: Path, prism: xr.DataArray, ca_geom: object):
         print(f"FAILED: Verification error: {e}")
 
 def main():
+    max_workers = 5
+
     # Setup Result Grid (PRISM)
     print("Loading Grid Definition...")
     prism = get_prism_grid(PRISM_REF_PATH)
@@ -214,7 +216,7 @@ def main():
         return
     
     with tqdm(total=len(dem_files), desc="Processing Tiles", unit="tile") as pbar:
-        with ThreadPoolExecutor(max_workers=5) as executor:
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
             futures = []
             for f in dem_files:
                 future = executor.submit(process_single_file, f, ca_geom, ca_prepared, lon_edges, lat_edges, stats_lock, accumulators)

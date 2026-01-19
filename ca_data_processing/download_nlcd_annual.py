@@ -14,7 +14,7 @@ import shutil
 
 BASE_URL = "https://www.mrlc.gov/downloads/sciweb1/shared/mrlc/data-bundles"
 START_YEAR = 2000
-END_YEAR = 2000
+END_YEAR = 2024
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 OUTPUT_DIR = DATA_DIR / "ca_nlcd_annual"
 CA_STATE = DATA_DIR / "ca_state" / "ca_state.shp"
