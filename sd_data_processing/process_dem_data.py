@@ -7,7 +7,6 @@ from scipy import stats
 from rioxarray.merge import merge_arrays
 
 # Constants
-# Constants
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 INPUT_DIR = Path.home() / "teams/b13-domain-2/data/USGS_DEM"
 OUTPUT_DIR = DATA_DIR / "usgs_dem"
