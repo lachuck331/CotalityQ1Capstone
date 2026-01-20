@@ -19,7 +19,7 @@ DATA_TYPES = ["tmax", "tdmean", "vpdmax", "ppt"]
 
 # Output directory
 DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data")
-OUTPUT_DIR = os.path.join(DATA_DIR, "prism_climate")
+OUTPUT_DIR = os.path.join(DATA_DIR, "ca_prism_climate")
 CA_SHAPEFILE_PATH = os.path.join(DATA_DIR, "ca_state", "ca_state.shp")
 
 START_YEAR = 2000
@@ -54,18 +54,18 @@ def download_and_process_prism_data(start_year, end_year, ca_state, worker_id=0)
                     # Target subset file path
                     output_filename = f"ca_prism_{dtype}_us_30s_{date_str}.nc"
                     output_path = os.path.join(OUTPUT_DIR, dtype, output_filename)
+                    extract_path = os.path.join(OUTPUT_DIR, dtype, date_str)
 
                     try:
                         # Check if subset file already exists to skip download
                         if os.path.exists(output_path):
-                             pbar.update(1)
-                             continue
+                            pbar.update(1)
+                            continue
 
                         # Download the file
                         urllib.request.urlretrieve(url, filepath)
                         
                         # Extract
-                        extract_path = os.path.join(OUTPUT_DIR, f"{dtype}", date_str)
                         if not os.path.exists(extract_path):
                             os.makedirs(extract_path)
                         
@@ -128,7 +128,7 @@ def download_and_process_prism_data(start_year, end_year, ca_state, worker_id=0)
                                     print(f"  Warning: Failed to remove {extract_path} after retries: {e}")
                                 else:
                                     time.sleep(0.5)
-                        
+
                         # Add a small delay
                         time.sleep(0.1)
                         
@@ -144,25 +144,16 @@ def download_and_process_prism_data(start_year, end_year, ca_state, worker_id=0)
 def verify_prism_output():
     found_files = []
 
-    DELETE_EXTENSIONS = ['.zip', '.xml', '.tif', '.aux.xml']
-    delete_count = 0
-
     for root, dirs, files in os.walk(OUTPUT_DIR):
         for file in files:
             full_path = os.path.join(root, file)
-            # Check for ca_prism prefix to only verify CA files
             if file.endswith(".nc") and file.startswith("ca_prism"):
                 found_files.append(full_path)
-            elif any(file.endswith(ext) for ext in DELETE_EXTENSIONS):
-                os.remove(full_path)
-                delete_count += 1
 
     if not found_files:
         print("FAILED: No subsetted NetCDF files found (looking for ca_prism*.nc).")
         return
-    
     print(f"Found {len(found_files)} subsetted files.")
-    print(f"Deleted {delete_count} files.")
     
     # Load CA shapefile once for comparison
     ca_shapefile_path = os.path.join("data", "ca_state", "ca_state.shp")
@@ -206,14 +197,25 @@ def verify_prism_output():
             print(f"FAILED: Error checking {os.path.basename(file_path)}: {e}")
             failed_count += 1
 
+    DELETE_EXTENSIONS = ['.zip', '.xml', '.tif', '.aux.xml', '.nc.aux.xml']
+    delete_count = 0
+
+    for root, dirs, files in os.walk(OUTPUT_DIR):
+        for file in files:
+            full_path = os.path.join(root, file)
+            if any(file.endswith(ext) for ext in DELETE_EXTENSIONS):
+                os.remove(full_path)
+                delete_count += 1
+
     print(f"\nVerification Complete.")
     print(f"Passed: {passed_count}")
     print(f"Failed: {failed_count}")
+    print(f"Deleted {delete_count} files.")
 
 def main():
     # Determine number of workers
     total_years = END_YEAR - START_YEAR + 1
-    max_workers = 5 # Set a reasonable maximum
+    max_workers = 10 # Set a reasonable maximum
     num_workers = min(max_workers, total_years)
     
     print(f"Starting download and processing with {num_workers} workers...")

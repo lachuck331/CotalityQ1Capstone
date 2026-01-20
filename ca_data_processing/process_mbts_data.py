@@ -9,10 +9,8 @@ import rasterio
 from rasterio import features
 from tqdm import tqdm
 
-# Disable GDAL auxiliary XML file creation
-os.environ['GDAL_PAM_ENABLED'] = 'NO'
+os.environ["GDAL_PAM_ENABLED"] = "NO"
 
-# Constants
 # Input path for the MTBS Perimeter data (Vector Shapefile)
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 INPUT_MTBS_PATH = DATA_DIR / "mtbs_perimeter_data" / "mtbs_perims_DD.shp"
@@ -147,9 +145,6 @@ def rasterize_data(gdf: gpd.GeoDataFrame, reference_path: Path, output_dir: Path
         
         output_filename = f"ca_mbts_800m_{date.strftime('%Y%m')}.nc"
         da.to_netcdf(output_dir / output_filename)
-
-        for file in output_dir.glob(f"ca_mbts_800m_{date.strftime('%Y%m')}.nc.aux.xml"):
-            file.unlink()
         
     print(f"Rasterization complete. Saved {len(dates)} files to {output_dir}")
 
@@ -176,33 +171,33 @@ def verify_rasterize(output_dir: Path, reference_path: Path):
     all_passed = True
     for file_path in tqdm(files, desc="Verifying files"):
         try:
-            ds = rioxarray.open_rasterio(file_path)
+            with rioxarray.open_rasterio(file_path) as ds:
+                
+                # Check Shape
+                if ds.shape[-2:] != ref_grid.shape[-2:]:
+                     print(f"FAILED {file_path.name}: Shape mismatch. Output: {ds.shape[-2:]}, Reference: {ref_grid.shape[-2:]}")
+                     all_passed = False
+                     continue
+    
+                # Check CRS
+                if ds.rio.crs != ref_grid.rio.crs:
+                     print(f"FAILED {file_path.name}: CRS mismatch.")
+                     all_passed = False
+                     continue
+                     
+                # Check Transform (Grid alignment)
+                if ds.rio.transform() != ref_grid.rio.transform():
+                     print(f"FAILED {file_path.name}: Transform mismatch (grid misalignment).")
+                     all_passed = False
+                     continue
+                     
+                # Check Values (should be 0 or 1)
+                unique_vals = np.unique(ds.values)
+                if not np.all(np.isin(unique_vals, [0, 1])):
+                     print(f"FAILED {file_path.name}: Found unexpected values in raster: {unique_vals}. Expected only 0 and 1.")
+                     all_passed = False
+                     continue
             
-            # Check Shape
-            if ds.shape[-2:] != ref_grid.shape[-2:]:
-                 print(f"FAILED {file_path.name}: Shape mismatch. Output: {ds.shape[-2:]}, Reference: {ref_grid.shape[-2:]}")
-                 all_passed = False
-                 continue
-
-            # Check CRS
-            if ds.rio.crs != ref_grid.rio.crs:
-                 print(f"FAILED {file_path.name}: CRS mismatch.")
-                 all_passed = False
-                 continue
-                 
-            # Check Transform (Grid alignment)
-            if ds.rio.transform() != ref_grid.rio.transform():
-                 print(f"FAILED {file_path.name}: Transform mismatch (grid misalignment).")
-                 all_passed = False
-                 continue
-                 
-            # Check Values (should be 0 or 1)
-            unique_vals = np.unique(ds.values)
-            if not np.all(np.isin(unique_vals, [0, 1])):
-                 print(f"FAILED {file_path.name}: Found unexpected values in raster: {unique_vals}. Expected only 0 and 1.")
-                 all_passed = False
-                 continue
-                 
         except Exception as e:
             print(f"FAILED {file_path.name}: Error verifying raster: {e}")
             all_passed = False
@@ -270,6 +265,18 @@ def verify_output(gdf: gpd.GeoDataFrame):
 
     print(f"SUCCESS: Final verification passed. {len(gdf)} records found, all match criteria.\n")
 
+def delete_extensions(output_dir: Path):
+    delete_count = 0
+    dates = pd.date_range(start=f'{START_YEAR}-01-01', end=f'{END_YEAR}-12-31', freq='MS')
+    
+    for date in dates:
+        files = list(output_dir.glob(f"ca_mbts_800m_{date.strftime('%Y%m')}.nc.aux.xml"))
+        for file in files:
+            os.remove(file)
+            delete_count += 1
+
+    if delete_count > 0:
+        print(f"\nDeleted {delete_count} extension files")
 
 def main():
     # 1. Setup Output Directory
@@ -297,6 +304,7 @@ def main():
     verify_state(clipped_gdf, ca_state)
     
     if clipped_gdf.empty:
+        delete_extensions(OUTPUT_DIR)
         print("Stopping due to empty clipped dataset.")
         return
 
@@ -316,6 +324,7 @@ def main():
     else:
         print("Final dataset is empty. Nothing to rasterize.")
 
+    delete_extensions(OUTPUT_DIR)
 
 if __name__ == "__main__":
     main()
