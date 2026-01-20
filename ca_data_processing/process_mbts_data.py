@@ -147,6 +147,9 @@ def rasterize_data(gdf: gpd.GeoDataFrame, reference_path: Path, output_dir: Path
         
         output_filename = f"ca_mbts_800m_{date.strftime('%Y%m')}.nc"
         da.to_netcdf(output_dir / output_filename)
+
+        for file in output_dir.glob(f"ca_mbts_800m_{date.strftime('%Y%m')}.nc.aux.xml"):
+            file.unlink()
         
     print(f"Rasterization complete. Saved {len(dates)} files to {output_dir}")
 

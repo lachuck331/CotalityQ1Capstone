@@ -32,7 +32,6 @@ class DownloadProgressBar(tqdm):
 def download_zip_for_year(year: int, output_dir: Path) -> Path:
     filename = f"Annual_NLCD_LndCov_{year}_CU_C1V1.zip"
     url = f"{BASE_URL}/{filename}"
-    output_dir = output_dir / str(year)
     output_dir.mkdir(parents=True, exist_ok=True)
     zip_path = output_dir / filename
 
@@ -48,6 +47,7 @@ def extract_zip(zip_path: Path, destination: Path) -> None:
 def clip_to_ca_state(nlcd_path: Path, ca_state: gpd.GeoDataFrame) -> Path:
     nlcd = rxr.open_rasterio(nlcd_path, masked=True)
     ca_state_nlcd_crs = ca_state.to_crs(nlcd.rio.crs)
+    print("Clipping to CA State BBox")
     nlcd_clipped = nlcd.rio.clip_box(
         minx=ca_state_nlcd_crs.total_bounds[0] - 10000,
         miny=ca_state_nlcd_crs.total_bounds[1] - 10000,
@@ -56,6 +56,7 @@ def clip_to_ca_state(nlcd_path: Path, ca_state: gpd.GeoDataFrame) -> Path:
     )
     
     # Clip to actual polygon geometry to remove data outside state borders
+    print("Clipping to CA State Polygon")
     nlcd_clipped = nlcd_clipped.rio.clip(
         ca_state_nlcd_crs.geometry,
         ca_state_nlcd_crs.crs,
@@ -63,6 +64,7 @@ def clip_to_ca_state(nlcd_path: Path, ca_state: gpd.GeoDataFrame) -> Path:
         invert=False
     )
     
+    print("Reprojecting to PRISM CRS")
     nlcd_geo = nlcd_clipped.rio.reproject("EPSG:4326")
     return nlcd_geo
 
@@ -78,16 +80,18 @@ def mode_statistic(values):
     return mode_result.mode
 
 def upscale_to_prism(nlcd_geo, prism, output_path):
-    # print("Upscaling to PRISM grid")
+    print("Upscaling to PRISM grid")
     
     # Mask excluded classes
     nlcd_masked = nlcd_geo.where(~nlcd_geo.isin(EXCLUDED_CLASSES))
+    print("Masked excluded classes")
     
     # Reproject match to PRISM
     nlcd_coarse = nlcd_masked.rio.reproject_match(
         prism,
         resampling=Resampling.mode
     )
+    print("Reprojected to PRISM grid")
     
     # Save to NetCDF
     nlcd_coarse.to_netcdf(output_path)
@@ -107,9 +111,11 @@ def download_and_extract_year(year: int, output_dir: Path, ca_state: gpd.GeoData
     nlcd_output = upscale_to_prism(nlcd_geo, prism, output_path)
     
     # Cleanup: remove original TIFF and XML files to save space
-    for file in zip_path.parent.glob("*.tif"):
+    for file in zip_path.parent.glob(f"Annual_NLCD_LndCov_{year}_CU_C1V1.tif"):
         file.unlink()
-    for file in zip_path.parent.glob("*.xml"):
+    for file in zip_path.parent.glob(f"Annual_NLCD_LndCov_{year}_CU_C1V1.xml"):
+        file.unlink()
+    for file in zip_path.parent.glob(f"Annual_NLCD_LndCov_{year}_CU_C1V1.tif.aux.xml"):
         file.unlink()
     
     return nlcd_output
@@ -180,7 +186,7 @@ def download_nlcd_annual_data(output_dir: Path = OUTPUT_DIR, max_workers: Option
     if not years:
         return
 
-    worker_count = max_workers or min(10, len(years))
+    worker_count = max_workers or min(2, len(years))
 
     print(f"Loading California State shapefile")
     if not CA_STATE.exists():
