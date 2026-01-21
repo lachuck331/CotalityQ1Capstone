@@ -27,19 +27,21 @@ END_YEAR = 2024
 
 def download_and_process_prism_data(start_year, end_year, ca_state, worker_id=0):
     """
-    Downloads PRISM climate data for years 1999-2024 and months 1-12.
+    Downloads PRISM climate data for years 2000-2024 and months 1-12.
     Subsets the data to California immediately after download.
     """
     # Calculate total downloads
     total_years = end_year - start_year + 1
-    total_months = 12
+    start_month = 1
+    end_month = 12
+    total_months = end_month - start_month + 1
     total_downloads = total_years * total_months * len(DATA_TYPES)
 
     # Loop through years and months with progress bar
     desc = f"Worker {worker_id} ({start_year}-{end_year})"
     with tqdm(total=total_downloads, desc=desc, position=worker_id) as pbar:
         for year in range(start_year, end_year + 1):
-            for month in range(1, 13):
+            for month in range(start_month, end_month + 1):
                 # Format date string as YYYYMM
                 date_str = f"{year}{month:02d}"
                 
@@ -215,7 +217,7 @@ def verify_prism_output():
 def main():
     # Determine number of workers
     total_years = END_YEAR - START_YEAR + 1
-    max_workers = 10 # Set a reasonable maximum
+    max_workers = 5 # Set a reasonable maximum
     num_workers = min(max_workers, total_years)
     
     print(f"Starting download and processing with {num_workers} workers...")
