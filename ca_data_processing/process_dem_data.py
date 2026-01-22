@@ -15,7 +15,7 @@ from shapely.prepared import prep
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 INPUT_DIR = DATA_DIR / "USGS_DEM"
 OUTPUT_DIR = DATA_DIR / "ca_usgs_dem"
-PRISM_REF_PATH = DATA_DIR / "prism_climate" / "ppt" / "ca_prism_ppt_us_30s_200001.nc"
+PRISM_REF_PATH = DATA_DIR / "ca_prism_climate" / "ppt" / "ca_prism_ppt_us_30s_200001.nc"
 CA_STATE_PATH = DATA_DIR / "ca_state" / "ca_state.shp"
 
 def get_prism_grid(path: Path):
