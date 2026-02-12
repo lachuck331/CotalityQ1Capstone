@@ -3,7 +3,7 @@
 
 Mentors: _Ilyes Meftah_, _Aaron Bagnell_
 
-Traditional wildfire burn probability assessment relies heavily on expensive physical fire spread model simulations, static fuel cover, and outdated historical ignitions. This project will explore whether we can estimate historical fire burn probabilities using widely available and dynamic geospatial, vegetation, topographic, and weather data instead. Using historical wildfire perimeter data from the Monitoring Trends in Burn Severity (MTBS) program for San Diego County, we will replicate and adapt the statistical methods presented in Climate Risks From Stress, Insects and Fire Across US Forests. (1). Model performance will be evaluated through cross-validation and out-of-sample testing (2005–2009), followed by spatial mapping of ensemble burn probabilities and an assessment of structures at risk. The resulting framework aims to provide a cost-efficient, reproducible method for local wildfire risk assessment and real-time resilience planning. 
+Traditional wildfire burn probability assessment relies heavily on expensive physical fire spread model simulations, static fuel cover, and outdated historical ignitions. This project will explore whether we can estimate historical fire burn probabilities using widely available and dynamic geospatial, vegetation, topographic, and weather data instead. Using historical wildfire perimeter data from the Monitoring Trends in Burn Severity (MTBS) program for Cal, we will replicate and adapt the statistical methods presented in Climate Risks From Stress, Insects and Fire Across US Forests. (1). Model performance will be evaluated through cross-validation and out-of-sample testing (2005–2009), followed by spatial mapping of ensemble burn probabilities and an assessment of structures at risk. The resulting framework aims to provide a cost-efficient, reproducible method for local wildfire risk assessment and real-time resilience planning. 
 
 Though we have not gotten to implementation yet, our detailed plan for the data sources and technical implementation of our project is below. 
 
@@ -65,7 +65,7 @@ We will use the following six data sources, classified as either Training, Predi
 **Overview:** This repo contains data download and pre-processing scripts, exploratory notebooks, and model notebooks to reproduce the Capstone analysis. The instructions below describe how to fetch and store data, install dependencies, and run the scripts and notebooks in the intended order.
 
 **Data storage (where files go):**
-  - `data/sd_county/` : San Diego County shapefiles (already present in repo for convenience)
+  - `data/ca_state/` : San Diego County shapefiles (already present in repo for convenience)
   - `data/prism/` : PRISM monthly climate files
   - `data/nlcd/` : NLCD annual landcover files
   - `data/mtbs/` : MTBS fire perimeter data
