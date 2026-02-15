@@ -62,8 +62,10 @@ This project integrates multiple public geospatial datasets:
     </ol>
 6. Ongoing Work
     <ol type="a">
-    <li> a. Use open street map dataset
-    <li>b. Construct an exceedance probability curve for the 800m grid cell
+    <li>Probability calibration and scaling
+    <li>SHAP-based interpretability analysis
+    <li>Burn probability raster generation
+    <li>Structure exposure and risk modeling
     </ol>
 
 
