@@ -24,18 +24,20 @@ This project integrates multiple public geospatial datasets:
     6) Originally scoped to San Diego County, now expanded to statewide California
 
 ## Workflow
-1. Pre-process input data layers to a consistent resolution and domain extent
+1. Data Preprocessing
     <ol type="a">
-    <li>Subset monthly PRISM climate variables to a domain that fully encompasses California</li>
-    <li>Calculate slope and aspect for the 1 arc second DEM, then upscale elevation, slope, and aspect to the 800m PRISM grid. Replicate layer so that it repeats monthly for the same number of time steps as the climate data </li>
-    <li>For each year of NLCD data upscale the land cover classes to the 800m PRISM DEM by calculating the dominant class for each 800m grid cell. Replicate annual files so they are repeated monthly and have the same number of time steps as the climate data</li>
-    <li> Use a nearest neighbor algorithm to regrid the monthly MODIS/Terra NDVI to the PRISM 800 m grid</li>
+    <li>Reproject and align all datasets to a common ≈800m spatial grid</li>
+    <li>Subset environmental layers to statewide California extent</li>
+    <li>Derive terrain features (elevation, slope) from DEM</li>
+    <li>Regrid NDVI and NLCD landcover to the analysis grid</li>
+    <li>Replicate static and annual layers to monthly resolution</li>
     </ol>
 
-2. Target Variable: Rasterize the MTBS Fire perimeters that intersect the domain over California for the period Jan2000-Dec2024.
+2. Target Variable Construction
     <ol type="a">
-    <li>Subset the MTBS dataset to the events that occurred in California and between 2000-2024 and have been labeled as a wildfire
-    <li>For each month in the timeseries find all events within your spatial domain and rasterize them to the 800m grid by setting grid cells for that month to 0 if they are outside a fire footprint and 1 if they are within a footprint
+    <li>Subset MTBS wildfire perimeters to California (2000–2024)
+    <li>Rasterize wildfire footprints onto the monthly grid
+    <li>Assign burned (1) and non-burned (0) labels per grid–month
     </ol>
 3. Train a binary classification model
     <ol type="a">
