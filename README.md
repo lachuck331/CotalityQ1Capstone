@@ -3,37 +3,38 @@
 
 Mentors: _Ilyes Meftah_, _Aaron Bagnell_
 
-Traditional wildfire burn probability assessment relies heavily on expensive physical fire spread model simulations, static fuel cover, and outdated historical ignitions. This project will explore whether we can estimate historical fire burn probabilities using widely available and dynamic geospatial, vegetation, topographic, and weather data instead. Using historical wildfire perimeter data from the Monitoring Trends in Burn Severity (MTBS) program for Cal, we will replicate and adapt the statistical methods presented in Climate Risks From Stress, Insects and Fire Across US Forests. (1). Model performance will be evaluated through cross-validation and out-of-sample testing (2005–2009), followed by spatial mapping of ensemble burn probabilities and an assessment of structures at risk. The resulting framework aims to provide a cost-efficient, reproducible method for local wildfire risk assessment and real-time resilience planning. 
+Traditional wildfire burn probability assessment often relies on computationally expensive physical fire spread simulations, static fuel representations, and limited historical ignition modeling. This project explores a complementary statistical learning approach that estimates historical wildfire burn probabilities using widely available geospatial, climatic, vegetation, and topographic data. We construct a large-scale monthly dataset for California spanning 2000 to 2024 by integrating PRISM climate variables, MTBS wildfire perimeters, MODIS NDVI, NLCD landcover, and USGS DEM terrain data. The objective is to develop a transparent, reproducible framework for probabilistic wildfire risk estimation suitable for large-scale spatial analysis and decision support.
 
-Though we have not gotten to implementation yet, our detailed plan for the data sources and technical implementation of our project is below. 
+The current implementation focuses on scalable data engineering, exploratory analysis, and baseline modeling. We developed a Polars-based preprocessing pipeline for memory-efficient merging, type optimization, feature engineering, and transformation across tens of millions of grid–month observations. Exploratory Data Analysis (EDA) identified structured missingness patterns, particularly elevated NDVI missingness in early 2000, which informed our decision to truncate early periods to improve dataset consistency. Baseline classification experiments using Logistic Regression and Support Vector Machines demonstrated high overall accuracy but poor wildfire detection due to extreme class imbalance (~0.4% positive cases). We subsequently implemented a GPU-accelerated XGBoost classifier, which improved ranking performance as measured by ROC AUC (≈0.82 to 0.84 across evaluation splits). Precision–recall performance remains constrained by event rarity, especially on validation data. Feature importance analysis was conducted to assess model behavior and interpretability. 
 
 ## Data
-We will use the following six data sources, classified as either Training, Predictor, or Spacial Domain.
-### <u>Training datasets </u>
+This project integrates multiple public geospatial datasets:
+### <u>Predictor/Feature Datasets </u>
     1) PRISM climate at 800m spatial resolution (Jan1999-Dec2024)
         Variables: Precipitation, maximum temperature, maximum VPD, mean dewpoint temperature
     2) USGS 1 Arc Second DEM files
     3) MODIS/Terra Vegetation Indices Monthly L3 Global 1km SIN Grid V061 for the period (Feb2000-Dec2024)
     4) Annual NLCD landcover for the period 1999-2024
 
-### <u>Predictor Datasets</u>
+### <u>Target Dataset</u>
     5) MTBS Fire Perimeter dataset
+        Historical wildfire footprints used to construct burned/non-burned labels
 
 ### <u>Spatial Domain dataset</u>
-    6) Polygon shapefile of San Diego County
+    6) Originally scoped to San Diego County, now expanded to statewide California
 
 ## Workflow
 1. Pre-process input data layers to a consistent resolution and domain extent
     <ol type="a">
-    <li>Subset monthly PRISM climate variables to a domain that fully encompasses San Diego County</li>
+    <li>Subset monthly PRISM climate variables to a domain that fully encompasses California</li>
     <li>Calculate slope and aspect for the 1 arc second DEM, then upscale elevation, slope, and aspect to the 800m PRISM grid. Replicate layer so that it repeats monthly for the same number of time steps as the climate data </li>
     <li>For each year of NLCD data upscale the land cover classes to the 800m PRISM DEM by calculating the dominant class for each 800m grid cell. Replicate annual files so they are repeated monthly and have the same number of time steps as the climate data</li>
     <li> Use a nearest neighbor algorithm to regrid the monthly MODIS/Terra NDVI to the PRISM 800 m grid</li>
     </ol>
 
-2. Target Variable: Rasterize the MTBS Fire perimeters that intersect the domain over San Diego County for the period Jan2000-Dec2024.
+2. Target Variable: Rasterize the MTBS Fire perimeters that intersect the domain over California for the period Jan2000-Dec2024.
     <ol type="a">
-    <li>Subset the MTBS dataset to the events that occurred in CA and between 2000-2024 and have been labeled as a wildfire
+    <li>Subset the MTBS dataset to the events that occurred in California and between 2000-2024 and have been labeled as a wildfire
     <li>For each month in the timeseries find all events within your spatial domain and rasterize them to the 800m grid by setting grid cells for that month to 0 if they are outside a fire footprint and 1 if they are within a footprint
     </ol>
 3. Train a binary classification model
