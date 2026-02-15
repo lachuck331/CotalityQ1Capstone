@@ -39,24 +39,28 @@ This project integrates multiple public geospatial datasets:
     <li>Rasterize wildfire footprints onto the monthly grid
     <li>Assign burned (1) and non-burned (0) labels per grid–month
     </ol>
-3. Train a binary classification model
+3. Feature Engineering
     <ol type="a">
-    <li>Lag the input data layers so they represent the previous month relative to the target variable (e.g. a fire in Jan2001 would pair with climate data from Dec2000)
-    <li>Withhold the years 2005-2009 as an independent validation set. Use the remaining data to perform 5-fold cross validation training using logistic regression. Independently save each of the five models trained during cross validation
-    <li>Plot the model coefficients for each model to determine the relative importance of the input data layers to building the classification model
+    <li>Apply log transforms to skewed climate variables
+    <li>Encode landcover categories via one-hot representation
+    <li>Construct lagged fire history predictors
+    <li>Standardize features using training data statistics    
     </ol>
-4. Validate the classification model
+4. Modeling
     <ol type="a">
-    <li>Apply the trained models to the withheld validation data to predict the burned perimeters during 2005-2009
-    <li>>Calculate the average annual observed burn area in km2 and that estimated by model ensemble average
-    <li>Plot a timeseries of the modeled and observed monthly burn area
-    <li>Map the modeled and observed burn areas and calculate the confusion matrix
+    <li>Train baseline classifiers (Logistic Regression, Random Forest, SVM)
+    <li>Train GPU-accelerated XGBoost classifier
+    <li>Address extreme class imbalance (~0.4% positive cases)
     </ol>
-5. Construct a burn probability map
+5. Evaluation
     <ol type="a">
-    <li>Plot a map of the annual burn probability across San Diego County with labelsover the centroids of some of the major communities: Downtown San Diego, El Cajon, Poway, Escondido, Ramona, and Vista
+    <li>Withhold years 2005–2009 as an independent validation set
+    <li>Compute precision, recall, F1 score
+    <li>Evaluate ROC AUC and PR AUC
+    <li>Analyze confusion matrices and spatial prediction behavior
+    
     </ol>
-6. Analyze the impact of the burn probabilities on structures
+6. Ongoing Work
     <ol type="a">
     <li> a. Use open street map dataset
     <li>b. Construct an exceedance probability curve for the 800m grid cell
