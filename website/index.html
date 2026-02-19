@@ -1,46 +1,263 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>My Website</title>
-    <link rel="stylesheet" href="style.css" />
-    <meta name="description" content="A simple, elegant website." />
-  </head>
-  <body>
-    <header>
-      <div class="container">
-        <h1>Welcome to My Website</h1>
-        <nav>
-          <ul>
-            <li><a href="#home">Home</a></li>
-            <li><a href="#about">About</a></li>
-            <li><a href="#contact">Contact</a></li>
-          </ul>
-        </nav>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#05060a" />
+  <title>California Burn Probability • Project</title>
+  <meta name="description" content="Modern project landing page: California burn probability modeling with public geospatial data." />
+
+  <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="./css/style.css" />
+</head>
+
+<body>
+  <!-- Background FX -->
+  <canvas id="particles" aria-hidden="true"></canvas>
+  <div class="bg-aurora" aria-hidden="true"></div>
+  <div class="bg-grid" aria-hidden="true"></div>
+  <div class="bg-grain" aria-hidden="true"></div>
+  <div class="cursor-glow" aria-hidden="true"></div>
+
+  <!-- Top Nav -->
+  <header class="topbar">
+    <div class="topbar__inner">
+      <a class="brand" href="#top" aria-label="Home">
+        <span class="brand__mark" aria-hidden="true"></span>
+        <span class="brand__text">
+          <span class="brand__title">EmberMetrics | Wildfire Risk Intelligence</span>
+          <span class="brand__sub">California • ~800m • Monthly</span>
+        </span>
+      </a>
+
+      <nav class="nav" aria-label="Primary">
+        <a class="nav__link" href="#about">Overview</a>
+        <a class="nav__link" href="#results">Results</a>
+        <a class="nav__link" href="#pipeline">Pipeline</a>
+        <a class="nav__link" href="#data">Data</a>
+        <a class="nav__link" href="#demo">Demo</a>
+        <a class="nav__link" href="#team">Team</a>
+      </nav>
+
+      <div class="topbar__actions">
+        <a class="btn btn--primary magnetic" href="#demo">
+          <span>View Demo</span>
+          <span class="btn__icon" aria-hidden="true">➜</span>
+        </a>
+        <a class="btn btn--ghost magnetic" href="https://github.com/" target="_blank" rel="noreferrer">
+          <span>GitHub</span>
+          <span class="btn__icon" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 98 96" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+              <path fill-rule="evenodd" clip-rule="evenodd" d="M48.854 0C21.839 0 0 22 0 49.217c0 21.756 13.993 40.172 33.405 46.69 2.427.49 3.316-1.059 3.316-2.362 0-1.141-.08-5.052-.08-9.127-13.59 2.934-16.42-5.867-16.42-5.867-2.184-5.704-5.42-7.17-5.42-7.17-4.448-3.015.324-3.015.324-3.015 4.934.326 7.523 5.052 7.523 5.052 4.367 7.496 11.404 5.378 14.235 4.074.404-3.178 1.699-5.378 3.074-6.6-10.839-1.141-22.243-5.378-22.243-24.283 0-5.378 1.94-9.778 5.014-13.2-.485-1.222-2.184-6.275.486-13.038 0 0 4.125-1.304 13.426 5.052a46.97 46.97 0 0 1 12.214-1.63c4.125 0 8.33.571 12.213 1.63 9.302-6.356 13.427-5.052 13.427-5.052 2.67 6.763.97 11.816.485 13.038 3.155 3.422 5.015 7.822 5.015 13.2 0 18.905-11.404 23.06-22.324 24.283 1.78 1.548 3.316 4.481 3.316 9.126 0 6.6-.08 11.897-.08 13.526 0 1.304.89 2.853 3.316 2.364 19.412-6.52 33.405-24.935 33.405-46.691C97.707 22 75.788 0 48.854 0z" />
+            </svg>
+          </span>
+        </a>
+
+        <button class="burger" id="burger" aria-label="Open menu" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
       </div>
-    </header>
+    </div>
+  </header>
 
-    <main class="container">
-      <section id="home">
-        <h2>Hello World</h2>
-        <p>This is a simple test website built with HTML, CSS, and JavaScript.</p>
-        <button id="clickMeBtn">Click Me</button>
-        <p id="message"></p>
-      </section>
+  <!-- Hero -->
+  <main id="top">
+    <section class="hero">
+      <div class="wrap hero__grid">
+        <div class="hero__copy">
+          <div class="pill reveal">
+            <span class="pill__spark" aria-hidden="true">✦</span>
+            <span><strong>Scalable</strong> wildfire risk modeling with <strong>public</strong> geospatial data</span>
+            <span class="dot" aria-hidden="true"></span>
+            <span class="muted">GPU-accelerated training</span>
+          </div>
 
-      <section id="about">
-        <h2>About</h2>
-        <p>This site is deployed via GitHub Pages.</p>
-      </section>
-    </main>
+          <h1 class="hero__title reveal">
+            Predict <span class="soft">where wildfires are likely to burn</span>
+            <span class="dim"> across California.</span>
+          </h1>
 
-    <footer>
-      <div class="container">
-        <p>&copy; 2024 My Website</p>
+          <p class="hero__desc reveal">
+            We fuse climate, vegetation, land cover, terrain, and historical fire perimeters into a single
+            monthly dataset (2000–2024), then train rare-event classifiers to estimate burn probability
+            over a ~800m grid.
+          </p>
+
+          <div class="hero__cta reveal">
+            <a class="btn btn--primary btn--big magnetic" href="#demo">
+              <span>Explore the interactive heatmap</span>
+              <span class="btn__icon" aria-hidden="true">➜</span>
+            </a>
+            <a class="btn btn--secondary btn--big magnetic" href="#pipeline">
+              <span>See the pipeline</span>
+              <span class="btn__icon" aria-hidden="true">⌁</span>
+            </a>
+          </div>
+
+          <div class="mini reveal">
+            <div class="mini__item">
+              <div class="mini__icon" aria-hidden="true">🗺️</div>
+              <div class="mini__text">
+                <div class="mini__label">Domain</div>
+                <div class="mini__value">California</div>
+              </div>
+            </div>
+            <div class="mini__item">
+              <div class="mini__icon" aria-hidden="true">▦</div>
+              <div class="mini__text">
+                <div class="mini__label">Resolution</div>
+                <div class="mini__value">~800m grid</div>
+              </div>
+            </div>
+            <div class="mini__item">
+              <div class="mini__icon" aria-hidden="true">⏳</div>
+              <div class="mini__text">
+                <div class="mini__label">Time span</div>
+                <div class="mini__value">2000–2024</div>
+              </div>
+            </div>
+            <div class="mini__item">
+              <div class="mini__icon" aria-hidden="true">⚡</div>
+              <div class="mini__text">
+                <div class="mini__label">Model</div>
+                <div class="mini__value">XGBoost (GPU)</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Hero Visual -->
+        <div class="hero__visual reveal">
+          <div class="viz">
+            <div class="viz__top">
+              <div class="viz__title">
+                <span class="badge">LIVE</span>
+                <span>Risk field preview</span>
+              </div>
+              <div class="viz__meta">
+                <span class="chip">monthly</span>
+                <span class="chip">rare-event</span>
+                <span class="chip">reproducible</span>
+              </div>
+            </div>
+
+            <div class="viz__canvas">
+              <canvas id="heroHeat" width="740" height="520"></canvas>
+              <div class="viz__overlay">
+                <div class="overlay__row">
+                  <div class="overlay__stat">
+                    <div class="k">Cells</div>
+                    <div class="v"><span class="counter" data-to="64000">0</span>+</div>
+                  </div>
+                  <div class="overlay__stat">
+                    <div class="k">Months</div>
+                    <div class="v"><span class="counter" data-to="300">0</span>+</div>
+                  </div>
+                  <div class="overlay__stat">
+                    <div class="k">AUC</div>
+                    <div class="v"><span class="counter" data-to="0.86" data-decimals="2">0</span></div>
+                  </div>
+                </div>
+                <div class="overlay__hint">
+                  <span aria-hidden="true">⌁</span> Hover + drag to feel the parallax
+                </div>
+              </div>
+            </div>
+
+            <div class="viz__bottom">
+              <div class="legend">
+                <span class="legend__label">Low</span>
+                <span class="legend__bar" aria-hidden="true"></span>
+                <span class="legend__label">High</span>
+              </div>
+              <div class="viz__note">
+                Visual is a stylized demo field (replace with real raster/tiles later).
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-    </footer>
 
-    <script src="script.js"></script>
-  </body>
+      <!-- hero bottom fade -->
+      <div class="fade"></div>
+    </section>
+
+    <!-- Proof Strip -->
+    <section class="proof">
+      <div class="wrap proof__inner reveal">
+        <div class="proof__item">
+          <span class="proof__icon" aria-hidden="true">🧪</span>
+          <span>End-to-end pipeline: ingestion → features → training → evaluation</span>
+        </div>
+        <div class="proof__item">
+          <span class="proof__icon" aria-hidden="true">🧠</span>
+          <span>Class imbalance handled with careful evaluation (ROC/PR)</span>
+        </div>
+        <div class="proof__item">
+          <span class="proof__icon" aria-hidden="true">🧱</span>
+          <span>Built for scaling: efficient processing + reproducible outputs</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Overview -->
+    <section id="about" class="section">
+
+    </section>
+
+    <!-- Results -->
+    <section id="results" class="section">
+
+    </section>
+
+    <!-- Pipeline -->
+    <section id="pipeline" class="section">
+
+    </section>
+
+    <!-- Data -->
+    <section id="data" class="section">
+
+    </section>
+
+    <!-- Demo -->
+    <section id="demo" class="section section--demo">
+
+    </section>
+
+    <!-- Team -->
+    <section id="team" class="section">
+
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="wrap footer__inner">
+      <div class="footer__left">
+        <div class="brand brand--small">
+          <span class="brand__mark" aria-hidden="true"></span>
+          <span class="brand__text">
+            <span class="brand__title">EmberMetrics | Wildfire Risk Intelligence</span>
+            <span class="brand__sub">Built for a clean research-to-product story</span>
+          </span>
+        </div>
+        <div class="footer__fine">
+          © <span id="year"></span> • Replace links with your repo / report / poster.
+        </div>
+      </div>
+
+      <div class="footer__right">
+        <a class="footer__link" href="#about">Overview</a>
+        <a class="footer__link" href="#pipeline">Pipeline</a>
+        <a class="footer__link" href="#demo">Demo</a>
+        <a class="footer__link" href="#top">Top</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="./js/particles.js"></script>
+  <script src="./js/heatmap.js"></script>
+  <script src="./js/script.js"></script>
+</body>
 </html>
