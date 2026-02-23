@@ -147,7 +147,7 @@ code{
   width: auto;
   max-width: 90%;
   border-radius: 999px;
-  background: rgba(5,6,10,0.6); /* distinct background */
+  background: rgba(5,6,10,0.3); /* distinct background */
   border: 1px solid rgba(255,255,255,0.12);
   backdrop-filter: blur(16px) saturate(180%);
   box-shadow: 0 10px 30px rgba(0,0,0,0.3);
