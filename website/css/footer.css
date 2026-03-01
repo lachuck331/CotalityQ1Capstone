@@ -1,0 +1,65 @@
+/* ---------- Footer ---------- */
+.footer {
+  border-top: 1px solid var(--stroke);
+}
+
+.footer__inner {
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.footer__left {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.footer .brand,
+.brand--small {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.brand__mark {
+  display: none;
+}
+
+.brand__text {
+  display: flex;
+  flex-direction: column;
+}
+
+.brand__title {
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.brand__sub {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.footer__fine {
+  display: none;
+}
+
+.footer__right {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.footer__link {
+  font-size: 13px;
+  color: var(--text-secondary);
+  transition: color .2s ease;
+}
+
+.footer__link:hover {
+  color: var(--text);
+}
+

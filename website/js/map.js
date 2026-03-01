@@ -62,7 +62,7 @@ const RANGES = {
 
 // Map Month Slider Index [0-23] to Actual Dates
 function getYearMonthFromIndex(index) {
-    const startYear = 2023;
+    const startYear = 2024;
     const year = startYear + Math.floor(index / 12);
     const month = (index % 12) + 1; // 1-aligned
     return { year, month };
@@ -178,16 +178,17 @@ window.initDemo = function () {
         allLabel.style.cursor = 'pointer';
         allLabel.style.display = 'flex';
         allLabel.style.alignItems = 'center';
-        allLabel.style.gap = '8px';
-        allLabel.style.padding = '8px 12px';
-        allLabel.style.borderRadius = '8px';
-        allLabel.style.border = `1px solid rgba(255, 255, 255, 0.2)`;
-        allLabel.style.background = activeLandcovers.size === 0 ? 'rgba(255, 255, 255, 0.15)' : 'rgba(255, 255, 255, 0.05)';
+        allLabel.style.gap = '4px';
+        allLabel.style.padding = '3px 6px';
+        allLabel.style.borderRadius = '4px';
+        allLabel.style.border = `1px solid var(--stroke)`;
+        allLabel.style.background = activeLandcovers.size === 0 ? 'var(--card-hover)' : 'transparent';
         allLabel.style.transition = 'all 0.2s';
+        allLabel.style.fontWeight = '600';
+        allLabel.style.fontSize = '10px';
         allLabel.innerHTML = `
             <input type="checkbox" id="lc_all" ${activeLandcovers.size === 0 ? 'checked' : ''} style="display: none;"> 
-            <span style="font-size: 14px; width: 16px; text-align: center;">${activeLandcovers.size === 0 ? '☑' : '☐'}</span>
-            <span style="font-weight: 600; font-size: 12px;">All Cover Types</span>
+            <span>All</span>
         `;
         lcToggles.appendChild(allLabel);
 
@@ -204,32 +205,34 @@ window.initDemo = function () {
             label.style.cursor = 'pointer';
             label.style.display = 'flex';
             label.style.alignItems = 'center';
-            label.style.gap = '8px';
-            label.style.padding = '6px 10px';
-            label.style.borderRadius = '6px';
-            label.style.border = isChecked ? `1px solid rgba(${rgbStr}, 0.8)` : `1px solid rgba(255, 255, 255, 0.1)`;
-            label.style.background = isChecked ? `rgba(${rgbStr}, 0.3)` : `rgba(255, 255, 255, 0.03)`;
-            label.style.opacity = isChecked ? '1' : '0.6';
-            label.style.transition = 'all 0.2s ease-in-out';
+            label.style.gap = '4px';
+            label.style.padding = '3px 6px';
+            label.style.borderRadius = '4px';
+            label.style.border = isChecked ? `1px solid rgba(${rgbStr}, 0.6)` : `1px solid transparent`;
+            label.style.background = isChecked ? `rgba(${rgbStr}, 0.2)` : `transparent`;
+            label.style.opacity = isChecked ? '1' : '0.5';
+            label.style.transition = 'all 0.15s ease';
+            label.style.fontSize = '10px';
+            label.style.lineHeight = '1.3';
 
             label.innerHTML = `
                 <input type="checkbox" value="${lc}" ${isChecked ? 'checked' : ''} style="display: none;"> 
-                <span style="font-size: 14px; width: 14px; text-align: center; color: ${isChecked ? `rgb(${rgbStr})` : 'inherit'};">${isChecked ? '☑' : '☐'}</span>
-                <span style="font-size: 11px; flex: 1; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">${prettyName}</span>
+                <span style="width:6px;height:6px;border-radius:2px;background:rgba(${rgbStr},${isChecked ? 0.9 : 0.3});flex-shrink:0;"></span>
+                <span>${prettyName}</span>
             `;
 
             // Hover effects
             label.addEventListener('mouseenter', () => {
                 if (!label.querySelector('input').checked) {
-                    label.style.background = `rgba(${rgbStr}, 0.15)`;
-                    label.style.opacity = '0.9';
+                    label.style.background = `rgba(${rgbStr}, 0.1)`;
+                    label.style.opacity = '0.8';
                 }
             });
             label.addEventListener('mouseleave', () => {
                 if (!label.querySelector('input').checked) {
-                    label.style.background = `rgba(255, 255, 255, 0.03)`;
-                    label.style.border = `1px solid rgba(255, 255, 255, 0.1)`;
-                    label.style.opacity = '0.6';
+                    label.style.background = `transparent`;
+                    label.style.border = `1px solid transparent`;
+                    label.style.opacity = '0.5';
                 }
             });
 
@@ -247,19 +250,17 @@ window.initDemo = function () {
             const isChecked = cb.checked;
 
             if (cb.id === 'lc_all') {
-                label.style.background = isChecked ? 'rgba(255, 255, 255, 0.15)' : 'rgba(255, 255, 255, 0.05)';
-                label.querySelector('span:nth-child(2)').textContent = isChecked ? '☑' : '☐';
+                label.style.background = isChecked ? 'var(--card-hover)' : 'transparent';
             } else {
                 const lc = cb.value;
                 const color = landcoverColors[lc] || [120, 120, 120, 200];
                 const rgbStr = `${color[0]}, ${color[1]}, ${color[2]}`;
-                const iconSpan = label.querySelector('span:nth-child(2)');
+                const dotSpan = label.querySelector('span:nth-child(2)');
 
-                label.style.border = isChecked ? `1px solid rgba(${rgbStr}, 0.8)` : `1px solid rgba(255, 255, 255, 0.1)`;
-                label.style.background = isChecked ? `rgba(${rgbStr}, 0.3)` : `rgba(255, 255, 255, 0.03)`;
-                label.style.opacity = isChecked ? '1' : '0.6';
-                iconSpan.textContent = isChecked ? '☑' : '☐';
-                iconSpan.style.color = isChecked ? `rgb(${rgbStr})` : 'inherit';
+                label.style.border = isChecked ? `1px solid rgba(${rgbStr}, 0.6)` : `1px solid transparent`;
+                label.style.background = isChecked ? `rgba(${rgbStr}, 0.2)` : `transparent`;
+                label.style.opacity = isChecked ? '1' : '0.5';
+                if (dotSpan) dotSpan.style.background = `rgba(${rgbStr}, ${isChecked ? 0.9 : 0.3})`;
             }
         }
 
@@ -320,6 +321,100 @@ window.initDemo = function () {
         }
     }
 
+    // Legend elements (cached)
+    const legendEl = document.querySelector('.demo-legend');
+    const scaleSection = document.querySelector('.demo-legend__section--scale');
+    const lcSection = document.querySelector('.demo-legend__section--lc');
+    const scaleTitle = document.querySelector('.demo-legend__title-text[data-mode="scale"]');
+    const lcTitle = document.querySelector('.demo-legend__title-text[data-mode="lc"]');
+
+    // Two-phase transition helpers
+    function hideSection(el) {
+        if (!el || el.classList.contains('is-hidden')) return;
+        if (el._collapseHandler) {
+            el.removeEventListener('transitionend', el._collapseHandler);
+        }
+        el.classList.add('is-hidden');
+        const onEnd = () => {
+            el.classList.add('is-collapsed');
+            el.removeEventListener('transitionend', onEnd);
+            el._collapseHandler = null;
+        };
+        el._collapseHandler = onEnd;
+        el.addEventListener('transitionend', onEnd);
+    }
+    function showSection(el) {
+        if (!el) return;
+        if (el._collapseHandler) {
+            el.removeEventListener('transitionend', el._collapseHandler);
+            el._collapseHandler = null;
+        }
+        el.classList.remove('is-collapsed');
+        void el.offsetHeight;
+        el.classList.remove('is-hidden');
+    }
+
+    // Standalone legend update — works regardless of data state
+    function updateLegend() {
+        const colName = layerSelect.value;
+        const range = RANGES[colName] || { min: 0, max: 1 };
+
+        // Toggle sections
+        if (colName === 'landcover') {
+            hideSection(scaleSection);
+            showSection(lcSection);
+            if (scaleTitle) scaleTitle.classList.add('is-hidden');
+            if (lcTitle) lcTitle.classList.remove('is-hidden');
+        } else {
+            hideSection(lcSection);
+            showSection(scaleSection);
+            if (scaleTitle) scaleTitle.classList.remove('is-hidden');
+            if (lcTitle) lcTitle.classList.add('is-hidden');
+        }
+
+        // Save current width
+        if (legendEl) legendEl._lastWidth = legendEl.offsetWidth;
+
+        // Crossfade bar + labels
+        const fadeDuration = 250;
+        const fadeTargets = [legendBar, scaleMax, scaleMidText, scaleMin];
+        fadeTargets.forEach(el => { if (el) { el.style.transition = `opacity ${fadeDuration}ms ease`; el.style.opacity = '0'; } });
+
+        setTimeout(() => {
+            scaleMax.textContent = range.max;
+            scaleMin.textContent = range.min;
+            scaleMidText.textContent = layerSelect.options[layerSelect.selectedIndex].text;
+
+            if (colName === 'ppt') {
+                legendBar.style.backgroundImage = 'linear-gradient(to top, #c8c896, #0064ff)';
+            } else if (colName === 'elevation') {
+                legendBar.style.backgroundImage = 'linear-gradient(to top, #1e2828, #e6dede)';
+            } else if (colName === 'y_pred' || colName === 'burned_area' || colName === 'y_pred_proba') {
+                legendBar.style.backgroundImage = 'linear-gradient(to top, rgb(30, 255, 30), rgb(255, 30, 30))';
+            } else if (colName === 'landcover') {
+                legendBar.style.backgroundImage = 'linear-gradient(0deg, #000, #333, #777, #aaa, #ccc, #fff)';
+            } else {
+                legendBar.style.backgroundImage = 'linear-gradient(0deg, #141e50, #c8e6c8, #ff6400, #ff00c8)';
+            }
+
+            // Animate width
+            if (legendEl) {
+                legendEl.style.transition = 'none';
+                legendEl.style.width = legendEl._lastWidth + 'px';
+                void legendEl.offsetWidth;
+                legendEl.style.width = 'fit-content';
+                const naturalWidth = legendEl.offsetWidth;
+                legendEl.style.width = legendEl._lastWidth + 'px';
+                void legendEl.offsetWidth;
+                legendEl.style.transition = 'width .3s ease';
+                legendEl.style.width = naturalWidth + 'px';
+                legendEl._lastWidth = naturalWidth;
+            }
+
+            fadeTargets.forEach(el => { if (el) el.style.opacity = '1'; });
+        }, fadeDuration);
+    }
+
     function renderMap() {
         if (!currentData) return;
 
@@ -347,34 +442,6 @@ window.initDemo = function () {
 
         const colName = layerSelect.value;
         const range = RANGES[colName] || { min: 0, max: 1 };
-
-        // Toggle Landcover Legend & Vertical Scale Visibility
-        const lcFiltersEl = document.querySelector('.landcover-filters');
-        const vertScaleEl = document.querySelector('.vertical-scale-container');
-        if (colName === 'landcover') {
-            if (lcFiltersEl) lcFiltersEl.style.display = 'flex';
-            if (vertScaleEl) vertScaleEl.style.display = 'none';
-        } else {
-            if (lcFiltersEl) lcFiltersEl.style.display = 'none';
-            if (vertScaleEl) vertScaleEl.style.display = 'flex';
-        }
-
-        // Update Legend Labels & Bar
-        scaleMax.textContent = range.max;
-        scaleMin.textContent = range.min;
-        scaleMidText.textContent = colName.includes('y_pred') ? 'Probability' : colName;
-
-        if (colName === 'ppt') {
-            legendBar.style.backgroundImage = 'linear-gradient(to top, #c8c896, #0064ff)';
-        } else if (colName === 'elevation') {
-            legendBar.style.backgroundImage = 'linear-gradient(to top, #1e2828, #e6dede)';
-        } else if (colName === 'y_pred' || colName === 'burned_area' || colName === 'y_pred_proba') {
-            legendBar.style.backgroundImage = 'linear-gradient(to top, rgb(30, 255, 30), rgb(255, 30, 30))';
-        } else if (colName === 'landcover') {
-            legendBar.style.backgroundImage = 'linear-gradient(0deg, #000, #333, #777, #aaa, #ccc, #fff)';
-        } else {
-            legendBar.style.backgroundImage = 'linear-gradient(0deg, #141e50, #c8e6c8, #ff6400, #ff00c8)';
-        }
 
         const layer = new ScatterplotLayer({
             id: `wildfire-points-${colName}`, // Unique ID for layer reuse
@@ -415,7 +482,11 @@ window.initDemo = function () {
                 maxZoom: INITIAL_VIEW_STATE.maxZoom,
                 pitch: INITIAL_VIEW_STATE.pitch,
                 bearing: INITIAL_VIEW_STATE.bearing,
-                projection: 'mercator' // Globe projection is incompatible with deck.gl overlay — use mercator for proper dot alignment
+                projection: 'mercator', // Globe projection is incompatible with deck.gl overlay — use mercator for proper dot alignment
+                maxBounds: [
+                    [-135.0, 30.5], // Southwestern corner (Lng, Lat) - Deep Pacific / Baja
+                    [-105.0, 42.5]  // Northeastern corner (Lng, Lat) - Midwest / Canada border
+                ]
             });
 
             currentDeckOverlay = new MapboxOverlay({
@@ -457,11 +528,12 @@ window.initDemo = function () {
 
     // Connect dropdown
     layerSelect.addEventListener("change", () => {
+        updateLegend();
         renderMap();
     });
 
     // Initial load sync
-    const initialIdx = parseInt(slider.value, 10) || 3;
+    const initialIdx = parseInt(slider.value, 10) || 0;
     const { year, month } = getYearMonthFromIndex(initialIdx);
     timeLabelEl.textContent = `${getMonthName(month)} ${year}`;
     fetchData(initialIdx);
