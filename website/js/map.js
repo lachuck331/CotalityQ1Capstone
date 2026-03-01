@@ -60,11 +60,14 @@ const RANGES = {
     elevation: { min: 0, max: 3500 }
 };
 
-// Map Month Slider Index [0-23] to Actual Dates
+// Map Month Slider Index [0-297] to Actual Dates (March 2000 - Dec 2024)
 function getYearMonthFromIndex(index) {
-    const startYear = 2024;
-    const year = startYear + Math.floor(index / 12);
-    const month = (index % 12) + 1; // 1-aligned
+    const startYear = 2000;
+    const startMonthOffset = 2; // March is 3rd month (0-indexed offset is 2)
+
+    const totalMonths = index + startMonthOffset;
+    const year = startYear + Math.floor(totalMonths / 12);
+    const month = (totalMonths % 12) + 1; // 1-aligned
     return { year, month };
 }
 
@@ -82,7 +85,17 @@ window.initDemo = function () {
     // Check if demo sections are fully loaded
     if (!container || !slider || !layerSelect) return;
 
-    const timeLabelEl = document.getElementById('timeLabel');
+    const timeMonthSelect = document.getElementById('timeMonth');
+    const timeYearSelect = document.getElementById('timeYear');
+    const dateGroupEl = document.getElementById('dateGroup');
+
+    // Populate Year Dropdown dynamically
+    for (let y = 2000; y <= 2024; y++) {
+        const opt = document.createElement('option');
+        opt.value = y;
+        opt.textContent = y;
+        timeYearSelect.appendChild(opt);
+    }
     const mapLoading = document.getElementById('mapLoading');
     const lcToggles = document.getElementById("lcToggles");
 
@@ -98,8 +111,8 @@ window.initDemo = function () {
         mapLoading.style.display = 'block';
 
         try {
-            // Local path testing. Will be updated to GH Releases URL later
-            const url = `./data/ca/${year}_${month.toString().padStart(2, '0')}.parquet`;
+            // Fetch directly from Hugging Face Datasets (which natively supports high-speed CORS requests)
+            const url = `https://huggingface.co/datasets/gwuwong/cotality-capstone/resolve/main/${year}_${month.toString().padStart(2, '0')}.parquet`;
 
             const resp = await fetch(url);
             if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
@@ -513,17 +526,104 @@ window.initDemo = function () {
         }
     }
 
+    // Helper to trigger date popup animation on the wrapper
+    function popDateGroup() {
+        dateGroupEl.style.animation = 'none';
+        void dateGroupEl.offsetHeight;
+        dateGroupEl.style.animation = 'poptext 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards';
+    }
+
     // Connect slider (update label immediately during drag)
     slider.addEventListener("input", () => {
         const idx = parseInt(slider.value, 10) || 0;
         const { year, month } = getYearMonthFromIndex(idx);
-        timeLabelEl.textContent = `${getMonthName(month)} ${year}`;
+
+        let changed = false;
+        if (parseInt(timeYearSelect.value, 10) !== year) {
+            timeYearSelect.value = year;
+            changed = true;
+        }
+        if (parseInt(timeMonthSelect.value, 10) !== month) {
+            timeMonthSelect.value = month;
+            changed = true;
+        }
+
+        if (changed) popDateGroup();
     });
 
     // Fetch data only after drag is released to save network calls
     slider.addEventListener("change", () => {
         const idx = parseInt(slider.value, 10) || 0;
         fetchData(idx);
+    });
+
+    // Handle Month/Year Dropdown Interactions 
+    function handleSelectChange() {
+        const y = parseInt(timeYearSelect.value, 10);
+        const m = parseInt(timeMonthSelect.value, 10);
+
+        // Reverse calculation: (Year delta * 12) + (Month delta from March)
+        let targetIdx = (y - 2000) * 12 + (m - 3);
+
+        // Clamp to allowed slider bounds
+        const max = parseInt(slider.max, 10);
+        targetIdx = Math.max(0, Math.min(max, targetIdx));
+
+        const startValue = parseInt(slider.value, 10);
+        const duration = 300; // ms
+        let startTime = null;
+
+        // Custom animation function to slide the native browser range thumb 
+        function step(timestamp) {
+            if (!startTime) startTime = timestamp;
+            const progress = Math.min((timestamp - startTime) / duration, 1);
+            // EaseOut cubic profile
+            const ease = 1 - Math.pow(1 - progress, 3);
+            slider.value = Math.round(startValue + (targetIdx - startValue) * ease);
+
+            if (progress < 1) {
+                requestAnimationFrame(step);
+            } else {
+                slider.value = targetIdx;
+                fetchData(targetIdx);
+            }
+        }
+
+        requestAnimationFrame(step);
+        popDateGroup();
+    }
+
+    timeMonthSelect.addEventListener("change", handleSelectChange);
+    timeYearSelect.addEventListener("change", handleSelectChange);
+
+    // Slider Hover Tooltip Logic
+    const tooltip = document.getElementById('sliderTooltip');
+
+    slider.addEventListener('mousemove', (e) => {
+        // Calculate which value the mouse is currently hovering over
+        const rect = slider.getBoundingClientRect();
+        let pct = (e.clientX - rect.left) / rect.width;
+        pct = Math.max(0, Math.min(1, pct));
+
+        const max = parseInt(slider.max, 10);
+        const min = parseInt(slider.min, 10);
+        const hoverIdx = Math.round(min + (max - min) * pct);
+
+        const { year, month } = getYearMonthFromIndex(hoverIdx);
+        tooltip.textContent = `${getMonthName(month)} ${year}`;
+
+        // Position tooltip exactly over the cursor
+        // Offset slightly to align the arrow with the thumb track center
+        const thumbOffset = (pct - 0.5) * 16; // 16px is approx width of native thumb
+        tooltip.style.left = `calc(${pct * 100}% - ${thumbOffset}px)`;
+    });
+
+    slider.addEventListener('mouseenter', () => {
+        tooltip.style.opacity = '1';
+    });
+
+    slider.addEventListener('mouseleave', () => {
+        tooltip.style.opacity = '0';
     });
 
     // Connect dropdown
@@ -535,6 +635,7 @@ window.initDemo = function () {
     // Initial load sync
     const initialIdx = parseInt(slider.value, 10) || 0;
     const { year, month } = getYearMonthFromIndex(initialIdx);
-    timeLabelEl.textContent = `${getMonthName(month)} ${year}`;
+    timeYearSelect.value = year;
+    timeMonthSelect.value = month;
     fetchData(initialIdx);
 };
