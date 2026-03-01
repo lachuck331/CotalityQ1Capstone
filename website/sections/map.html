@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>California Wildfire Risk Map</title>
+
+    <!-- MapLibre for base maps -->
+    <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
+    <link href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" rel="stylesheet" />
+
+    <!-- Deck.gl and Loaders.gl -->
+    <script src="https://unpkg.com/deck.gl@9.0.0/dist.min.js"></script>
+    <!-- Arrow and Parquet loaders -->
+    <script src="https://unpkg.com/@loaders.gl/core@4.1.1/dist/dist.min.js"></script>
+    <script src="https://unpkg.com/@loaders.gl/parquet@4.1.1/dist/dist.min.js"></script>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: ui-sans-serif, system-ui, sans-serif;
+            background: #05060a;
+            color: #fff;
+            overflow: hidden;
+        }
+
+        #container {
+            width: 100vw;
+            height: 100vh;
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+        }
+
+        #ui-panel {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 10;
+            background: rgba(10, 10, 10, 0.75);
+            backdrop-filter: blur(12px);
+            padding: 24px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            width: 320px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        h3 {
+            margin: 0 0 10px 0;
+            font-size: 16px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #b7fff0, #8aa7ff);
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        label {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.55);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-weight: 800;
+        }
+
+        select {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 8px;
+            outline: none;
+            transition: 0.2s;
+            cursor: pointer;
+        }
+
+        select:hover {
+            border-color: rgba(255, 255, 255, 0.25);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .legend {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .legend-bar {
+            height: 10px;
+            border-radius: 99px;
+            width: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .legend-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.55);
+        }
+
+        #loading {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            padding: 12px 24px;
+            border-radius: 99px;
+            font-size: 13px;
+            font-weight: 600;
+            z-index: 20;
+            display: none;
+            border: 1px solid rgba(183, 255, 240, 0.3);
+            color: #b7fff0;
+            box-shadow: 0 0 20px rgba(183, 255, 240, 0.1);
+        }
+
+        .deck-tooltip {
+            font-family: inherit !important;
+            font-size: 12px !important;
+            background: rgba(0, 0, 0, 0.85) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            border-radius: 8px !important;
+            padding: 10px 14px !important;
+            color: #fff !important;
+            backdrop-filter: blur(4px) !important;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
+        }
+
+        .tooltip-title {
+            font-weight: 800;
+            color: #b7fff0;
+            margin-bottom: 4px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 4px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="container"></div>
+    <div id="loading">Loading binary data slice...</div>
+
+    <div id="ui-panel">
+        <h3>Wildfire Risk Explorer</h3>
+
+        <div class="control-group">
+            <label for="yearSelect">Year</label>
+            <select id="yearSelect">
+                <option value="2023">2023</option>
+                <option value="2024">2024</option>
+            </select>
+        </div>
+
+        <div class="control-group">
+            <label for="monthSelect">Month</label>
+            <select id="monthSelect">
+                <option value="1">January</option>
+                <option value="2">February</option>
+                <option value="3">March</option>
+                <option value="4" selected>April</option>
+                <option value="5">May</option>
+                <option value="6">June</option>
+                <option value="7">July</option>
+                <option value="8">August</option>
+                <option value="9">September</option>
+                <option value="10">October</option>
+                <option value="11">November</option>
+                <option value="12">December</option>
+            </select>
+        </div>
+
+        <div class="control-group">
+            <label for="columnSelect">Visualization Layer</label>
+            <select id="columnSelect">
+                <option value="y_pred_proba">Predicted Burn Probability</option>
+                <option value="burned_area">Actual Burned Area</option>
+                <option value="ppt">Precipitation (ppt)</option>
+                <option value="tmax">Max Temperature (tmax)</option>
+                <option value="vpdmax">Vapor Pressure Deficit (vpdmax)</option>
+                <option value="ndvi">NDVI (Vegetation Index)</option>
+                <option value="elevation">Elevation</option>
+            </select>
+        </div>
+
+        <div class="legend">
+            <label>Intensity Scale</label>
+            <!-- Gradient will be updated via JS based on selected col -->
+            <div id="legendBar" class="legend-bar"
+                style="background: linear-gradient(90deg, #111, #8aa7ff, #ffb86b, #ff6bd6);"></div>
+            <div class="legend-labels">
+                <span>Low</span>
+                <span>High</span>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/map.js"></script>
+
+</body>
+
+</html>

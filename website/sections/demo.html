@@ -1,113 +1,107 @@
-      <div class="wrap">
-        <div class="section__head reveal">
-          <h2>Interactive demo</h2>
-          <p>
-            This is a polished placeholder heatmap you can later replace with your real outputs (tiles/raster).
-            It already supports time scrolling + hover tooltips + smooth rendering.
-          </p>
+<div class="wrap">
+  <div class="section__head reveal">
+    <h2>Interactive demo</h2>
+    <p>
+      Explore the data directly in the browser. Powered by <strong>Deck.gl</strong> + WebGL rendering <strong>Apache
+        Parquet</strong> binary slices locally. Try scrubbing through time!
+    </p>
+  </div>
+
+  <div class="demo reveal">
+    <div class="demo__left">
+      <div class="demo__panel">
+        <div class="demo__panelTop">
+          <div class="demo__title">
+            <span class="badge">GPU Rendered</span>
+            <span>California Risk Pipeline</span>
+          </div>
+          <!-- <div class="demo__chips">
+            <span class="chip">Deck.gl</span>
+            <span class="chip">Apache Arrow</span>
+            <span class="chip">MapLibre</span>
+          </div> -->
         </div>
 
-        <div class="demo reveal">
-          <div class="demo__left">
-            <div class="demo__panel">
-              <div class="demo__panelTop">
-                <div class="demo__title">
-                  <span class="badge">DEMO</span>
-                  <span>Monthly burn probability</span>
-                </div>
-                <div class="demo__chips">
-                  <span class="chip">hover</span>
-                  <span class="chip">time slider</span>
-                  <span class="chip">canvas</span>
-                </div>
-              </div>
+        <div class="demo__canvasWrap">
+          <div id="demoHeatContainer" class="deck-container"></div>
+          <div id="mapLoading" class="map-loading" style="display: none;">Fetching Data...</div>
+          <div class="tooltip" id="tooltip" role="status" aria-live="polite" hidden></div>
+        </div>
 
-              <div class="demo__canvasWrap">
-                <canvas id="demoHeat" width="980" height="560"></canvas>
-                <div class="tooltip" id="tooltip" role="status" aria-live="polite" hidden></div>
-              </div>
-
-              <div class="demo__controls">
-                <div class="control">
-                  <label for="t" class="control__label">Time</label>
-                  <input id="t" type="range" min="0" max="299" value="180" />
-                </div>
-                <div class="control__meta">
-                  <div class="metaBox">
-                    <div class="metaBox__k">Month</div>
-                    <div class="metaBox__v" id="timeLabel">—</div>
-                  </div>
-                  <div class="metaBox">
-                    <div class="metaBox__k">Hover cell</div>
-                    <div class="metaBox__v" id="hoverLabel">—</div>
-                  </div>
-                  <div class="metaBox">
-                    <div class="metaBox__k">Prob</div>
-                    <div class="metaBox__v" id="probLabel">—</div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="demo__foot">
-                <div class="legend">
-                  <span class="legend__label">Low</span>
-                  <span class="legend__bar" aria-hidden="true"></span>
-                  <span class="legend__label">High</span>
-                </div>
-                <div class="demo__note">
-                  Tip: Replace <code>heatmap.js</code> mock generator with real grid predictions.
-                </div>
-              </div>
-            </div>
+        <div class="demo__controls">
+          <div class="control">
+            <label for="t" class="control__label">Time (January 2023 - December 2024)</label>
+            <input id="t" type="range" min="0" max="23" value="3" />
           </div>
 
-          <div class="demo__right">
-            <div class="demoCard tilt reveal">
-              <div class="demoCard__top">
-                <div class="ico" aria-hidden="true">🧠</div>
-                <h3>What this becomes</h3>
-              </div>
-              <p>
-                A product-ready interface: time slider, layers, and drill-down to show why the model thinks
-                a region is higher risk.
-              </p>
-              <ul>
-                <li>Raster tiles (PMTiles / Cloudflare R2 / S3)</li>
-                <li>Vector overlays (perimeters, admin boundaries)</li>
-                <li>Model explanations (top features / SHAP)</li>
-              </ul>
-            </div>
+          <div class="control" style="margin-top: 4px;">
+            <label for="layerSelect" class="control__label">Metric / Visualization Layer</label>
+            <select id="layerSelect" class="demo-select">
+              <option value="y_pred_proba">Predicted Burn Probability</option>
+              <option value="y_pred">Predicted Burn Incident (0/1)</option>
+              <option value="burned_area">Actual Burned Area</option>
+              <option value="landcover">Landcover</option>
+              <option value="ppt">Precipitation (ppt)</option>
+              <option value="tmax">Max Temperature (tmax)</option>
+              <option value="vpdmax">Vapor Pressure Deficit (vpdmax)</option>
+              <option value="ndvi">NDVI (Vegetation Index)</option>
+              <option value="elevation">Elevation</option>
+            </select>
+          </div>
 
-            <div class="demoCard tilt reveal">
-              <div class="demoCard__top">
-                <div class="ico" aria-hidden="true">⚙️</div>
-                <h3>Deployment path</h3>
-              </div>
-              <p>
-                You can keep this exact UI and swap the data backend:
-                local JSON → API → tile server.
-              </p>
-              <ul>
-                <li>Precompute monthly grids</li>
-                <li>Serve via API or tiles</li>
-                <li>Cache + fast interaction</li>
-              </ul>
+          <div class="control__meta" style="margin-top: 8px;">
+            <div class="metaBox">
+              <div class="metaBox__k" id="timeLabelHeader">Year/Month</div>
+              <div class="metaBox__v" id="timeLabel">April 2023</div>
             </div>
+          </div>
+        </div>
 
-            <div class="ctaBox reveal">
-              <div class="ctaBox__t">Want it to look even more insane?</div>
-              <div class="ctaBox__p">
-                Add a real basemap + vector overlays later—this layout is designed to absorb that without redesign.
-              </div>
-              <div class="ctaBox__btns">
-                <a class="btn btn--primary magnetic" href="#top">
-                  <span>Back to top</span><span class="btn__icon" aria-hidden="true">↑</span>
-                </a>
-                <a class="btn btn--ghost magnetic" href="#team">
-                  <span>Meet the team</span><span class="btn__icon" aria-hidden="true">➜</span>
-                </a>
-              </div>
-            </div>
+        <div class="demo__foot">
+          <div class="demo__note">
+            Loads ~600,000 GPU rendered points under 300 ms.
           </div>
         </div>
       </div>
+    </div>
+
+    <div class="demo__right">
+      <div class="demoCard tilt reveal" style="height: 500px; display: flex; flex-direction: column;">
+        <div class="demoCard__top">
+          <div class="ico" aria-hidden="true">📊</div>
+          <h3>Map Legend &amp; Filters</h3>
+        </div>
+
+        <div style="display: flex; gap: 24px; flex: 1; margin-top: 16px; min-height: 0;">
+
+          <!-- Vertical Scale -->
+          <div class="vertical-scale-container"
+            style="position: relative; width: max-content; min-width: 60px; height: 100%; display: flex; gap: 8px;">
+            <div id="legendBar"
+              style="flex-shrink: 0; width: 16px; height: 100%; border-radius: 8px; background: linear-gradient(0deg, #141e50, #c8e6c8, #ff6400, #ff00c8);">
+            </div>
+            <div id="scaleLabels"
+              style="display: flex; flex-direction: column; justify-content: space-between; font-size: 11px; color: rgba(255,255,255,0.7); font-weight: 500; height: 100%; padding-top:4px; padding-bottom:4px;">
+              <span id="scaleMax">1.0</span>
+              <span id="scaleMidText">Value</span>
+              <span id="scaleMin">0.0</span>
+            </div>
+          </div>
+
+          <!-- Landcover Filters -->
+          <div class="landcover-filters"
+            style="flex: 1; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; padding-right: 8px;">
+            <h4
+              style="margin: 0; font-size: 12px; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.5px;">
+              Landcover Filter</h4>
+            <div id="lcToggles"
+              style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; color: rgba(255,255,255,0.8);">
+              <!-- Will be injected by JS -->
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

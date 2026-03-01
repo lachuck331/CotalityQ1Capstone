@@ -173,7 +173,7 @@
     // index 0 => Jan 2000
     const y = startYear + Math.floor(index / 12);
     const m = index % 12;
-    const names = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    const names = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
     return `${names[m]} ${y}`;
   }
 
@@ -235,102 +235,6 @@
     }
   }
 
-  // -------- Interactive demo --------
-  function initDemo() {
-    const c = document.getElementById("demoHeat");
-    const slider = document.getElementById("t");
-    if (!c || !slider) return;
-
-    const ctx = c.getContext("2d");
-
-    const tooltip = document.getElementById("tooltip");
-    const timeLabelEl = document.getElementById("timeLabel");
-    const hoverLabelEl = document.getElementById("hoverLabel");
-    const probLabelEl = document.getElementById("probLabel");
-
-    const cols = 160;
-    const rows = 92;
-
-    let tIndex = parseInt(slider.value, 10) || 180;
-    let field = makeField(cols, rows, tIndex);
-
-    let hover = null; // {cx, cy}
-    let lastPointer = { x: 0, y: 0 };
-
-    function render() {
-      drawHeat(ctx, c.width, c.height, cols, rows, field, { vignette: true, grid: true, highlight: hover });
-      timeLabelEl.textContent = monthLabel(tIndex, 2000);
-    }
-
-    function cellFromPointer(e) {
-      const r = c.getBoundingClientRect();
-      const x = clamp(e.clientX - r.left, 0, r.width);
-      const y = clamp(e.clientY - r.top, 0, r.height);
-      const cx = clamp(Math.floor((x / r.width) * cols), 0, cols - 1);
-      const cy = clamp(Math.floor((y / r.height) * rows), 0, rows - 1);
-      return { cx, cy, x, y, r };
-    }
-
-    function updateHover(e) {
-      const p = cellFromPointer(e);
-      lastPointer = { x: e.clientX, y: e.clientY };
-
-      const v = field[p.cy * cols + p.cx];
-      if (v <= 0) {
-        hover = null;
-        if (tooltip) tooltip.hidden = true;
-        hoverLabelEl.textContent = "—";
-        probLabelEl.textContent = "—";
-        render();
-        return;
-      }
-
-      hover = { cx: p.cx, cy: p.cy };
-
-      hoverLabelEl.textContent = `(${p.cx}, ${p.cy})`;
-      probLabelEl.textContent = v.toFixed(3);
-
-      if (tooltip) {
-        tooltip.hidden = false;
-        tooltip.textContent = `Cell (${p.cx}, ${p.cy}) • p = ${v.toFixed(3)} • ${monthLabel(tIndex, 2000)}`;
-        // position tooltip near pointer but inside panel
-        const panel = c.parentElement.getBoundingClientRect();
-        const tx = clamp(e.clientX - panel.left + 14, 14, panel.width - 280);
-        const ty = clamp(e.clientY - panel.top + 14, 14, panel.height - 60);
-        tooltip.style.transform = `translate3d(${tx}px, ${ty}px, 0)`;
-      }
-
-      render();
-    }
-
-    slider.addEventListener("input", () => {
-      tIndex = parseInt(slider.value, 10) || 0;
-      field = makeField(cols, rows, tIndex);
-      render();
-      if (hover) {
-        // refresh tooltip
-        const v = field[hover.cy * cols + hover.cx];
-        if (v > 0 && tooltip && !tooltip.hidden) {
-          tooltip.textContent = `Cell (${hover.cx}, ${hover.cy}) • p = ${v.toFixed(3)} • ${monthLabel(tIndex, 2000)}`;
-          probLabelEl.textContent = v.toFixed(3);
-        }
-      }
-    });
-
-    c.addEventListener("pointermove", updateHover, { passive: true });
-    c.addEventListener("pointerleave", () => {
-      hover = null;
-      if (tooltip) tooltip.hidden = true;
-      hoverLabelEl.textContent = "—";
-      probLabelEl.textContent = "—";
-      render();
-    });
-
-    // initial render
-    render();
-  }
-
   // boot
   initHero();
-  window.initDemo = initDemo;
 })();
