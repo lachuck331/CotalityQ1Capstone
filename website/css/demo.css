@@ -357,9 +357,102 @@
 .demo-slider {
   flex: 1;
   min-width: 80px;
-  accent-color: var(--text);
-  height: 3px;
   cursor: pointer;
+  position: relative;
+  z-index: 2;
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+}
+
+.demo-slider::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 3px;
+  background: var(--stroke);
+  border-radius: 2px;
+}
+
+.demo-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  height: 10px;
+  width: 10px;
+  border-radius: 50%;
+  background: var(--text);
+  cursor: pointer;
+  margin-top: -3.5px;
+}
+
+.demo-slider::-moz-range-track {
+  width: 100%;
+  height: 3px;
+  background: var(--stroke);
+  border-radius: 2px;
+}
+
+.demo-slider::-moz-range-thumb {
+  height: 10px;
+  width: 10px;
+  border-radius: 50%;
+  background: var(--text);
+  cursor: pointer;
+  border: none;
+}
+
+.demo-slider-mark {
+  position: absolute;
+  top: -24px;
+  transform: translateX(-50%);
+  width: 24px;
+  height: 24px;
+  color: #FFC107;
+  /* yellow */
+  font-size: 20px;
+  line-height: 1;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  opacity: 0.9;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+  transition: transform 0.2s, opacity 0.2s;
+}
+
+.demo-slider-mark::after {
+  content: "★";
+}
+
+.demo-slider-mark:hover {
+  transform: translateX(-50%) scale(1.2);
+  opacity: 1;
+  z-index: 30;
+}
+
+.demo-slider-mark::before {
+  content: attr(data-date);
+  position: absolute;
+  top: -32px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--text);
+  color: var(--bg);
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-family: inherit;
+  font-weight: 700;
+  pointer-events: none;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s, visibility 0.2s;
+}
+
+.demo-slider-mark:hover::before {
+  opacity: 1;
+  visibility: visible;
 }
 
 input[type="range"] {

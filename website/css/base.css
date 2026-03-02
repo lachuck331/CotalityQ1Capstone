@@ -35,11 +35,11 @@
 
 /* Dark mode */
 [data-theme="dark"] {
-  --bg: #262626;
-  --bg2: #2e2e2e;
-  --surface: #303030;
-  --card: rgba(255, 255, 255, .04);
-  --card-hover: rgba(255, 255, 255, .07);
+  --bg: #1a1a1a;
+  --bg2: #242424;
+  --surface: #262626;
+  --card: rgba(255, 255, 255, .02);
+  --card-hover: rgba(255, 255, 255, .05);
   --stroke: rgba(255, 255, 255, .08);
   --stroke2: rgba(255, 255, 255, .05);
   --text: #e8e8e8;
@@ -59,11 +59,11 @@
 /* System preference: dark */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #262626;
-    --bg2: #2e2e2e;
-    --surface: #303030;
-    --card: rgba(255, 255, 255, .04);
-    --card-hover: rgba(255, 255, 255, .07);
+    --bg: #1a1a1a;
+    --bg2: #242424;
+    --surface: #262626;
+    --card: rgba(255, 255, 255, .02);
+    --card-hover: rgba(255, 255, 255, .05);
     --stroke: rgba(255, 255, 255, .08);
     --stroke2: rgba(255, 255, 255, .05);
     --text: #e8e8e8;

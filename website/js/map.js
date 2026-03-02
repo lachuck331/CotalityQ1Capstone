@@ -142,7 +142,7 @@ window.initDemo = function () {
         if (value === undefined || value === null) return [0, 0, 0, 0];
 
         if (colName === 'burned_area' || colName === 'y_pred') {
-            return value > 0.5 ? [255, 30, 30, 200] : [30, 255, 30, 200]; // Red = 1, Green = 0
+            return value > 0.5 ? [255, 30, 30, 200] : [30, 160, 30, 200]; // Red = 1, Subdued Green = 0
         }
 
         const range = RANGES[colName] || { min: 0, max: 1 };
@@ -151,8 +151,8 @@ window.initDemo = function () {
 
         if (colName === 'y_pred_proba') {
             const r = Math.round(ratio * 255);
-            const g = Math.round((1 - ratio) * 255);
-            return [r, g, 0, 200]; // Gradient Green to Red
+            const g = Math.round((1 - ratio) * 160); // Darker base green instead of 255
+            return [r, g, 0, 200]; // Gradient Subdued Green to Red
         }
 
         if (colName === 'ppt') {
@@ -403,7 +403,7 @@ window.initDemo = function () {
             } else if (colName === 'elevation') {
                 legendBar.style.backgroundImage = 'linear-gradient(to top, #1e2828, #e6dede)';
             } else if (colName === 'y_pred' || colName === 'burned_area' || colName === 'y_pred_proba') {
-                legendBar.style.backgroundImage = 'linear-gradient(to top, rgb(30, 255, 30), rgb(255, 30, 30))';
+                legendBar.style.backgroundImage = 'linear-gradient(to top, rgb(30, 160, 30), rgb(255, 30, 30))';
             } else if (colName === 'landcover') {
                 legendBar.style.backgroundImage = 'linear-gradient(0deg, #000, #333, #777, #aaa, #ccc, #fff)';
             } else {
@@ -456,17 +456,105 @@ window.initDemo = function () {
         const colName = layerSelect.value;
         const range = RANGES[colName] || { min: 0, max: 1 };
 
+        // --- Burned Area Clustering ---
+        const burnedPts = [];
+        const srcData = Array.isArray(displayData) ? displayData : (displayData.data || displayData);
+        const srcLen = srcData.length || 0;
+        const isArrw = typeof srcData.get === 'function';
+
+        for (let i = 0; i < srcLen; i++) {
+            const item = isArrw ? srcData.get(i) : srcData[i];
+            if (!item) continue;
+            const burned = item.burned_area !== undefined ? item.burned_area : (item.get ? item.get('burned_area') : 0);
+            if (burned > 0.5) {
+                const lon = item.lon !== undefined ? item.lon : (item.get ? item.get('lon') : 0);
+                const lat = item.lat !== undefined ? item.lat : (item.get ? item.get('lat') : 0);
+                burnedPts.push({ lon, lat });
+            }
+        }
+
+        const distFunc = (p1, p2) => Math.sqrt(Math.pow(p1.lon - p2.lon, 2) + Math.pow(p1.lat - p2.lat, 2));
+        const ptsClusters = [];
+        const CLUSTER_THRESH = 0.2; // roughly 20km search radius for neighbor points
+
+        // DBSCAN-like O(n^2) neighbor grouping strategy for grouping points into contiguous fires
+        const visited = new Set();
+
+        for (let i = 0; i < burnedPts.length; i++) {
+            if (visited.has(i)) continue;
+
+            // Start a new cluster
+            const clusterPoints = [burnedPts[i]];
+            visited.add(i);
+
+            // Expand the cluster by finding neighbors of neighbors
+            for (let j = 0; j < clusterPoints.length; j++) {
+                const p1 = clusterPoints[j];
+
+                for (let k = i + 1; k < burnedPts.length; k++) {
+                    if (visited.has(k)) continue;
+
+                    const p2 = burnedPts[k];
+                    const d = distFunc(p1, p2);
+
+                    if (d < CLUSTER_THRESH) {
+                        clusterPoints.push(p2);
+                        visited.add(k);
+                    }
+                }
+            }
+
+            ptsClusters.push(clusterPoints);
+        }
+
+        const clusterCircles = ptsClusters.map(points => {
+            // Calculate true geographic center of the contiguous point mass
+            const center = {
+                lon: points.reduce((sum, p) => sum + p.lon, 0) / points.length,
+                lat: points.reduce((sum, p) => sum + p.lat, 0) / points.length
+            };
+
+            // Find the furthest point from the new mathematical center
+            let maxD = 0;
+            for (const p of points) {
+                const d = distFunc(center, p);
+                if (d > maxD) maxD = d;
+            }
+
+            // Add padding so stroke clears the dots visually
+            const rMeters = Math.max(maxD * 111000, 4000) + 700;
+            return { lon: center.lon, lat: center.lat, radius: rMeters };
+        });
+
+        const clusterLayer = new ScatterplotLayer({
+            id: 'wildfire-clusters',
+            data: clusterCircles,
+            pickable: false,
+            opacity: 0.3,
+            stroked: true,
+            filled: false,
+            getLineColor: [255, 0, 0, 255],
+            getLineWidth: 1200, // 1.2km wide stroke
+            lineWidthUnits: 'meters', // Scales geographically with zoom
+            lineWidthMinPixels: 2, // Ensures it doesn't vanish entirely when zoomed far out
+            radiusUnits: 'meters',
+            getPosition: d => [d.lon, d.lat, 100],
+            getRadius: d => d.radius,
+            parameters: { depthTest: false }
+        });
+        // --- End Clustering ---
+
         const layer = new ScatterplotLayer({
             id: `wildfire-points-${colName}`, // Unique ID for layer reuse
             data: displayData,
             pickable: true,
-            opacity: 0.9,
+            opacity: 0.2,
             stroked: false,
             filled: true,
             radiusUnits: 'meters', // Mapbox globe requires meters to trace earth curvature properly
             radiusScale: 1,
             radiusMinPixels: 2, // Keep dots visible even when zoomed out to globe view
-            radiusMaxPixels: 15, // Cap dot sizes when zoomed in extremely close
+            radiusMaxPixels: 5, // Cap dot sizes when zoomed in extremely close
 
             getPosition: d => {
                 const lon = d.lon !== undefined ? d.lon : (d.get ? d.get('lon') : 0);
@@ -477,7 +565,7 @@ window.initDemo = function () {
                 const val = d[colName] !== undefined ? d[colName] : (d.get ? d.get(colName) : 0);
                 return getColor(val, colName);
             },
-            getRadius: 800 * 0.45, // 800m grid cell mapped to slightly undersized radius (0.45) to prevent overlapping circles
+            getRadius: 800 * 0.35, // 800m grid cell mapped to slightly undersized radius to prevent overlapping circles
             updateTriggers: {
                 getFillColor: [colName]
             }
@@ -502,9 +590,35 @@ window.initDemo = function () {
                 ]
             });
 
+            // Handle the evaluated expression error from custom Base Style
+            currentMapbox.on('style.load', () => {
+                const style = currentMapbox.getStyle();
+                if (style && style.layers) {
+                    style.layers.forEach(layer => {
+                        // The error was specifically tied to pedestrian/service road lengths ("len" missing)
+                        // It usually manifests in 'road-pedestrian-polygon-pattern' or 'road-path' style layers
+                        if (layer.id.includes('road') || layer.id.includes('pedestrian') || layer.id.includes('path')) {
+                            try {
+                                const filter = currentMapbox.getFilter(layer.id);
+                                if (filter && JSON.stringify(filter).includes('"len"')) {
+                                    currentMapbox.removeLayer(layer.id);
+                                }
+                            } catch (e) { }
+                        }
+                    });
+                }
+            });
+
+            currentMapbox.on('error', (e) => {
+                // Suppress noisy mapbox evaluate errors that don't break the base map
+                if (e.error && e.error.message && e.error.message.includes('["get","len"]')) {
+                    e.preventDefault();
+                }
+            });
+
             currentDeckOverlay = new MapboxOverlay({
                 interleaved: true,
-                layers: [layer],
+                layers: [layer, clusterLayer],
                 getTooltip: ({ object }) => {
                     if (!object) return null;
                     const dynamicCol = layerSelect.value;
@@ -522,7 +636,7 @@ window.initDemo = function () {
             currentMapbox.addControl(currentDeckOverlay);
         } else {
             // Using setProps safely updates layers without resetting any viewport/zoom transformations
-            currentDeckOverlay.setProps({ layers: [layer] });
+            currentDeckOverlay.setProps({ layers: [layer, clusterLayer] });
         }
     }
 
@@ -632,10 +746,72 @@ window.initDemo = function () {
         renderMap();
     });
 
-    // Initial load sync
-    const initialIdx = parseInt(slider.value, 10) || 0;
-    const { year, month } = getYearMonthFromIndex(initialIdx);
-    timeYearSelect.value = year;
-    timeMonthSelect.value = month;
-    fetchData(initialIdx);
+    // --- Add special date markers to the slider ---
+    async function loadBurnDates() {
+        try {
+            const resp = await fetch('./data/ca_burn_dates.json');
+            if (!resp.ok) return;
+            const dates = await resp.json();
+            const wrapper = document.querySelector('.demo-slider-wrapper');
+
+            // Sort dates chronologically to guarantee we can find the earliest easily
+            dates.sort((a, b) => (a.year - b.year) || (a.month - b.month));
+
+            const min = parseInt(slider.min, 10) || 0;
+            const max = parseInt(slider.max, 10) || 297;
+            const range = max - min;
+
+            let earliestValidIdx = null;
+
+            dates.forEach(d => {
+                const idx = (d.year - 2000) * 12 + (d.month - 1) - 2;
+                if (idx >= min && idx <= max) {
+                    if (earliestValidIdx === null) earliestValidIdx = idx; // Grab first sorted valid date
+
+                    if (wrapper) {
+                        const pct = (idx - min) / range;
+                        // Match native range thumb offset behavior (10px approx width)
+                        const thumbOffset = (pct - 0.5) * 10;
+                        const mark = document.createElement('div');
+                        mark.className = 'demo-slider-mark';
+                        mark.style.left = `calc(${pct * 100}% - ${thumbOffset}px)`;
+                        mark.dataset.date = `${getMonthName(d.month).substring(0, 3)} '${String(d.year).slice(-2)}`;
+
+                        mark.addEventListener('click', () => {
+                            timeYearSelect.value = d.year;
+                            timeMonthSelect.value = d.month;
+                            handleSelectChange();
+                        });
+
+                        wrapper.appendChild(mark);
+                    }
+                }
+            });
+
+            // Initialize map view to the FIRST (minimum) important burn date
+            let initialIdx = earliestValidIdx !== null ? earliestValidIdx : (parseInt(slider.value, 10) || 0);
+            const initialYM = getYearMonthFromIndex(initialIdx);
+
+            slider.value = initialIdx;
+            timeYearSelect.value = initialYM.year;
+            timeMonthSelect.value = initialYM.month;
+
+            // Dispatch input event to update the native slider tooltip position visually
+            slider.dispatchEvent(new Event('input'));
+
+            fetchData(initialIdx);
+
+        } catch (e) {
+            console.error("Failed to load burn dates:", e);
+            // Fallback load if dates fail
+            const initialIdx = parseInt(slider.value, 10) || 0;
+            const fallbackYM = getYearMonthFromIndex(initialIdx);
+            timeYearSelect.value = fallbackYM.year;
+            timeMonthSelect.value = fallbackYM.month;
+            fetchData(initialIdx);
+        }
+    }
+
+    // Kickoff the async loading chain
+    loadBurnDates();
 };
