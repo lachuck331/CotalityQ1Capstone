@@ -17,7 +17,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
     rel="stylesheet" />
 
-  <link rel="stylesheet" href="./css/style.css" />
+  <link rel="stylesheet" href="./css/style.css?v=5" />
 
   <!-- Mapbox GL JS for Base Maps -->
   <link href="https://api.mapbox.com/mapbox-gl-js/v3.8.0/mapbox-gl.css" rel="stylesheet">
@@ -25,6 +25,7 @@
 
   <!-- Deck.gl (Standalone Script API) -->
   <script src="https://unpkg.com/deck.gl@9.2.9/dist.min.js"></script>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
 </head>
 
 <body>
@@ -36,25 +37,26 @@
   <main id="top">
     <div id="hero"></div>
 
-    <!-- Overview (commented out) -->
-    <!-- <section id="about" class="section"></section> -->
+    <!-- Introduction -->
+    <section id="introduction" class="section"></section>
 
-    <!-- Results (commented out) -->
-    <!-- <section id="results" class="section"></section> -->
+    <!-- Pipeline -->
+    <section id="pipeline" class="section"></section>
 
-    <!-- Pipeline (commented out) -->
-    <!-- <section id="pipeline" class="section"></section> -->
+    <!-- Methodology -->
+    <section id="methodology" class="section"></section>
 
-    <!-- Data (commented out) -->
-    <!-- <section id="data" class="section"></section> -->
+    <!-- Results (includes model explorer) -->
+    <section id="results" class="section section--demo"></section>
 
-    <!-- Demo -->
-    <section id="demo" class="section section--demo">
-    </section>
+    <!-- Limitations & Next Steps -->
+    <section id="limitations" class="section"></section>
+
+    <!-- Backward compatibility anchor -->
+    <div id="demo" hidden aria-hidden="true"></div>
 
     <!-- Team -->
-    <section id="team" class="section">
-    </section>
+    <section id="team" class="section"></section>
   </main>
 
   <!-- Footer -->
@@ -71,11 +73,10 @@
 
       <div class="footer__right">
         <a class="footer__link" href="#top">Home</a>
-        <!-- <a class="footer__link" href="#about">Overview</a> -->
-        <!-- <a class="footer__link" href="#results">Results</a> -->
-        <!-- <a class="footer__link" href="#pipeline">Pipeline</a> -->
-        <!-- <a class="footer__link" href="#data">Data</a> -->
-        <a class="footer__link" href="#demo">Demo</a>
+        <a class="footer__link" href="#introduction">Intro</a>
+        <a class="footer__link" href="#pipeline">Pipeline</a>
+        <a class="footer__link" href="#results">Results</a>
+        <a class="footer__link" href="#limitations">Next Steps</a>
         <a class="footer__link" href="#team">Team</a>
         <a class="footer__link" href="https://github.com/lachuck331/CotalityQ1Capstone" target="_blank"
           rel="noreferrer">GitHub</a>
@@ -86,6 +87,7 @@
   <script src="./js/ui.js"></script>
   <script src="./js/team.js"></script>
   <script src="./js/map.js"></script>
+  <script src="./js/visualizations.js?v=9"></script>
   <script src="./js/script.js"></script>
 </body>
 

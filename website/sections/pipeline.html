@@ -1,51 +1,17 @@
-      <div class="wrap">
-        <div class="section__head reveal">
-          <h2>Pipeline</h2>
-          <p>
-            The whole point: your audience understands the end-to-end system in <em>15 seconds</em>.
-          </p>
-        </div>
+<div class="wrap">
+  <div class="section__head reveal">
+    <h2>Pipeline</h2>
+    <p>
+      End-to-end processing from raw public datasets to monthly model outputs. The graph below summarizes the
+      workflow used in this project.
+    </p>
+  </div>
 
-        <div class="timeline reveal">
-          <div class="step">
-            <div class="step__dot" aria-hidden="true"></div>
-            <div class="step__card tilt">
-              <div class="step__k">1) Ingest</div>
-              <div class="step__t">Download + standardize raw sources</div>
-              <div class="step__p">Climate (PRISM), vegetation (NDVI), land cover (NLCD), terrain (DEM), fire perimeters (MTBS).</div>
-            </div>
-          </div>
-          <div class="step">
-            <div class="step__dot" aria-hidden="true"></div>
-            <div class="step__card tilt">
-              <div class="step__k">2) Feature engineering</div>
-              <div class="step__t">Join to a monthly grid</div>
-              <div class="step__p">Consistent spatial indexing, monthly aggregation, and clean training tables.</div>
-            </div>
-          </div>
-          <div class="step">
-            <div class="step__dot" aria-hidden="true"></div>
-            <div class="step__card tilt">
-              <div class="step__k">3) Train</div>
-              <div class="step__t">GPU XGBoost baseline</div>
-              <div class="step__p">Imbalance-aware training strategy and hyperparameter tuning.</div>
-            </div>
-          </div>
-          <div class="step">
-            <div class="step__dot" aria-hidden="true"></div>
-            <div class="step__card tilt">
-              <div class="step__k">4) Evaluate</div>
-              <div class="step__t">Ranking + stability checks</div>
-              <div class="step__p">Metrics + map-based validation to catch nonsense predictions.</div>
-            </div>
-          </div>
-          <div class="step">
-            <div class="step__dot" aria-hidden="true"></div>
-            <div class="step__card tilt">
-              <div class="step__k">5) Deploy-ready</div>
-              <div class="step__t">Artifacts for a product</div>
-              <div class="step__p">Heatmaps, reports, and a path to tile serving / API integration.</div>
-            </div>
-          </div>
-        </div>
-      </div>
+  <div class="vizCard reveal">
+    <div id="pipelineViz" class="d3-stage" aria-label="Pipeline graph visualization"></div>
+    <!-- <div class="vizCaption">
+      Data sources: PRISM, NDVI, NLCD, DEM, MTBS -> harmonized 800m grid -> feature engineering -> model training ->
+      evaluation.
+    </div> -->
+  </div>
+</div>

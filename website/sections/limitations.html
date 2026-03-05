@@ -1,0 +1,43 @@
+<div class="wrap">
+  <div class="section__head reveal">
+    <h2>Limitations & Next Steps</h2>
+    <p>
+      The tuned model improves random-split test performance, but temporal holdout performance drops sharply.
+      This suggests limited generalization under severe class imbalance and potential overfitting to training-era
+      patterns.
+    </p>
+  </div>
+
+  <div class="stack reveal">
+    <div class="stack__item">
+      <div class="stack__icon" aria-hidden="true">⚠️</div>
+      <div>
+        <div class="stack__t">Current Limitation</div>
+        <div class="stack__p">Temporal validation PR-AUC remains very low despite strong random-split metrics.</div>
+      </div>
+    </div>
+    <div class="stack__item">
+      <div class="stack__icon" aria-hidden="true">🎯</div>
+      <div>
+        <div class="stack__t">Threshold & Calibration</div>
+        <div class="stack__p">Tune decision thresholds and calibrate probabilities for rare-event deployment.</div>
+      </div>
+    </div>
+    <div class="stack__item">
+      <div class="stack__icon" aria-hidden="true">🕒</div>
+      <div>
+        <div class="stack__t">Temporal Robustness</div>
+        <div class="stack__p">Use stricter temporal cross-validation during model selection and tuning.</div>
+      </div>
+    </div>
+    <div class="stack__item">
+      <div class="stack__icon" aria-hidden="true">➕</div>
+      <div>
+        <div class="stack__t">Feature Expansion</div>
+        <div class="stack__p">
+          Evaluate additional ignition-related predictors and cost-sensitive strategies for minority events.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

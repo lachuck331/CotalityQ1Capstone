@@ -1,16 +1,4 @@
-<div class="wrap">
-  <div class="section__head reveal">
-    <h2>California Wildfire Prediction Explorer</h2>
-    <p style="max-width: none;">
-      This is an interactive report on California wildfire risk powered by our XGBoost machine learning model.
-      It highlights how climate metrics (precipitation, temperature, vapor pressure deficit), vegetation health (NDVI),
-      landcover classifications, and terrain features (elevation, slope, aspect) shape predicted burn probability
-      across the state. Navigate through more than 25 years of historical fire outcomes and model forecasts to compare
-      spatial and seasonal patterns in wildfire activity.
-    </p>
-  </div>
-
-  <div class="demo-container reveal">
+<div class="demo-container reveal">
     <!-- Map area with legend + landcover overlay -->
     <div class="demo-map-area">
       <div id="demoHeatContainer" class="deck-container"></div>
@@ -96,15 +84,11 @@
 
   </div>
 
-  <div class="demo-instructions reveal"
-    style="margin-top: 16px; padding: 12px 16px; border-radius: var(--r2); background: var(--bg2); border: 1px solid var(--stroke2);">
-    <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin: 0;">
-      <strong>How to use this explorer:</strong><br>
-      • <strong>Time Travel:</strong> Drag the slider or use the dropdowns to change the date.<br>
-      • <strong>Major Fires:</strong> Click the <span style="color:#FFC107">★</span> stars on the timeline to jump to
-      months with severe wildfires.<br>
-      • <strong>Data Layers:</strong> Select different attributes from the Layer dropdown to explore their spatial
-      correlation with California wildfires.
-    </p>
-  </div>
+<div class="demo-instructions reveal"
+  style="margin-top: 16px; padding: 12px 16px; border-radius: var(--r2); background: var(--bg2); border: 1px solid var(--stroke2);">
+  <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin: 0;">
+    <strong>Quick controls:</strong>
+    drag the time slider, jump with <span style="color:#FFC107">★</span> markers, and switch layers to compare model
+    probability, observed burns, and feature surfaces.
+  </p>
 </div>

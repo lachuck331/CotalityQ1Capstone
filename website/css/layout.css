@@ -1,7 +1,5 @@
-
 .section__head p {
   color: var(--text-secondary);
-  max-width: 60ch;
   line-height: 1.7;
   font-size: 14px;
 }
@@ -19,7 +17,7 @@
   border: 1px solid var(--stroke);
   background: var(--card);
   padding: 18px;
-  transition: border-color .2s ease;
+  transition: border-color 0.2s ease;
   position: relative;
 }
 
@@ -88,7 +86,7 @@
   font-size: 11px;
   color: var(--dim);
   text-transform: uppercase;
-  letter-spacing: .12em;
+  letter-spacing: 0.12em;
   font-weight: 600;
 }
 
@@ -102,7 +100,7 @@
 .bigcard__v .counter {
   font-size: 36px;
   font-weight: 800;
-  letter-spacing: -.03em;
+  letter-spacing: -0.03em;
 }
 
 .bigcard__s {
@@ -123,7 +121,7 @@
   width: var(--p);
   background: var(--accent);
   border-radius: 99px;
-  opacity: .6;
+  opacity: 0.6;
 }
 
 .bigcard__note {
@@ -151,7 +149,7 @@
   font-size: 11px;
   color: var(--dim);
   text-transform: uppercase;
-  letter-spacing: .12em;
+  letter-spacing: 0.12em;
   font-weight: 600;
 }
 
@@ -267,4 +265,283 @@
   grid-template-columns: 50px 1fr;
   gap: 10px;
   padding: 10px 0;
+}
+
+/* ---------- D3 / Results Additions ---------- */
+.vizCard {
+  position: relative;
+  border-radius: var(--r);
+  border: 1px solid var(--stroke);
+  background: var(--card);
+  padding: 16px;
+  margin-top: 12px;
+}
+
+.vizCard__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.vizCard__top h3 {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.vizCaption {
+  margin-top: 10px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.d3-stage {
+  width: 100%;
+  min-height: 240px;
+}
+
+#pipelineViz {
+  min-height: 980px;
+}
+
+.d3-stage svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.pipeline-node,
+.pipeline-node * {
+  cursor: default;
+}
+
+.pipeline-node text {
+  user-select: none;
+}
+
+.d3-tooltip {
+  position: absolute;
+  z-index: 20;
+  pointer-events: none;
+  max-width: 260px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--stroke);
+  background: color-mix(in srgb, var(--bg) 90%, transparent);
+  color: var(--text);
+  box-shadow: var(--shadow);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.vizDialog {
+  position: fixed;
+  inset: 0;
+  z-index: 220;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.vizDialog.is-open {
+  pointer-events: auto;
+}
+
+.vizDialog__overlay {
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, #000 38%, transparent);
+  backdrop-filter: blur(2px);
+  opacity: 0;
+  transition: opacity 0.08s linear;
+}
+
+.vizDialog.is-open .vizDialog__overlay {
+  opacity: 1;
+}
+
+.vizDialog__panel {
+  position: relative;
+  width: min(620px, calc(100vw - 32px));
+  background: var(--surface);
+  border: 1px solid var(--stroke);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  padding: 20px 20px 18px;
+  transform: translateY(20px) scale(0.97);
+  opacity: 0;
+  transition:
+    transform 0.36s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.36s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.vizDialog.is-open .vizDialog__panel {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+}
+
+.vizDialog__close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--stroke);
+  border-radius: 8px;
+  background: var(--bg2);
+  color: var(--text);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.1s ease;
+}
+
+.vizDialog__close:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+.vizDialog__close:active {
+  transform: scale(0.92);
+  background: var(--accent);
+}
+
+.vizDialog__title {
+  font-size: 17px;
+  line-height: 1.3;
+  font-weight: 700;
+  margin: 0 36px 10px 0;
+}
+
+.vizDialog__body {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.vizError {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.resultsTable {
+  border-radius: var(--r);
+  border: 1px solid var(--stroke);
+  background: var(--card);
+  padding: 14px;
+}
+
+.resultsTable__head {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--dim);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.resultsTable__grid {
+  display: grid;
+  grid-template-columns: 1.8fr repeat(4, 1fr);
+  gap: 8px;
+  padding: 9px 8px;
+  border-top: 1px solid var(--stroke2);
+  font-size: 13px;
+}
+
+.resultsTable__grid--header {
+  color: var(--text-secondary);
+  font-weight: 600;
+  border-top: 0;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.resultsExplorerHead {
+  margin-top: 18px;
+}
+
+.btn--small {
+  padding: 6px 10px;
+  font-size: 12px;
+}
+
+/* ---------- Pipeline link flowing animation ---------- */
+@keyframes dashFlow {
+  to {
+    stroke-dashoffset: -24;
+  }
+}
+
+.pipeline-link--animated {
+  animation: dashFlow 1.2s linear infinite;
+}
+
+/* ---------- Pipeline node hover ---------- */
+.pipeline-node rect {
+  transition:
+    filter 0.25s ease,
+    transform 0.2s ease;
+}
+
+.pipeline-node:hover rect {
+  filter: drop-shadow(0 0 8px var(--accent-glow))
+    drop-shadow(0 2px 6px rgba(0, 0, 0, 0.1));
+}
+
+.pipeline-node {
+  transition: transform 0.22s ease;
+}
+
+.pipeline-node:hover {
+  transform: translateY(-2px);
+}
+
+/* ---------- Feature importance bar hover ---------- */
+.fi-bar {
+  transition:
+    opacity 0.22s ease,
+    filter 0.22s ease;
+}
+
+.fi-bars--hovered .fi-bar {
+  opacity: 0.35;
+  filter: saturate(0.5);
+}
+
+.fi-bars--hovered .fi-bar--active {
+  opacity: 1;
+  filter: saturate(1.2) brightness(1.08);
+}
+
+@media (max-width: 980px) {
+  #pipelineViz {
+    min-height: 1180px;
+  }
+
+  .resultsTable__grid {
+    grid-template-columns: 1.4fr 1fr 1fr;
+  }
+
+  .resultsTable__grid > div:nth-child(4),
+  .resultsTable__grid > div:nth-child(5) {
+    display: none;
+  }
+
+  .vizCard__top {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pipeline-link--animated {
+    animation: none;
+  }
 }

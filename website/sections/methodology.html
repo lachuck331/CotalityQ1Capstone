@@ -1,0 +1,39 @@
+<div class="wrap">
+  <div class="section__head reveal">
+    <h2>Methodology</h2>
+    <p>
+      We start with standard baselines, then move to imbalance-aware tree boosting after observing that rare fire
+      events are overwhelmed by the negative class.
+    </p>
+  </div>
+
+  <div class="grid3">
+    <article class="card reveal">
+      <div class="card__top">
+        <div class="ico" aria-hidden="true">1</div>
+        <h3>Baselines First</h3>
+      </div>
+      <p>Logistic Regression, Random Forest, and Linear SVM establish initial performance and failure modes.</p>
+    </article>
+
+    <article class="card reveal">
+      <div class="card__top">
+        <div class="ico" aria-hidden="true">2</div>
+        <h3>Extreme Imbalance</h3>
+      </div>
+      <p>
+        Positive fire labels are very rare, so high overall accuracy can still hide weak fire-event detection.
+      </p>
+    </article>
+
+    <article class="card reveal">
+      <div class="card__top">
+        <div class="ico" aria-hidden="true">3</div>
+        <h3>XGBoost + Optuna</h3>
+      </div>
+      <p>
+        GPU-accelerated XGBoost with hyperparameter tuning targets stronger ranking and minority-class behavior.
+      </p>
+    </article>
+  </div>
+</div>
