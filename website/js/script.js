@@ -34,6 +34,8 @@ async function loadAllSections() {
     window.UI.initAll(); // Initialize everything (theme, nav, reveal, etc.) AFTER elements are loaded
   }
 
+  if (window.initTracingBeam) window.initTracingBeam();
+
   if (window.initPipelineViz) window.initPipelineViz();
   if (window.initFeatureImportanceViz) window.initFeatureImportanceViz();
   if (window.initDemo) window.initDemo();

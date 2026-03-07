@@ -1,6 +1,6 @@
 /* ---------- Footer ---------- */
 .footer {
-  border-top: 1px solid var(--stroke);
+  border-top: none;
 }
 
 .footer__inner {

@@ -1,0 +1,129 @@
+/* ============================================
+   Tracing Beam — Aceternity-style scroll nav
+   SVG path alternates between two lanes
+   ============================================ */
+
+/* ---------- Hide Scrollbar ---------- */
+html {
+  scrollbar-width: none;
+}
+html::-webkit-scrollbar {
+  display: none;
+}
+
+/* ---------- Fixed Container ---------- */
+.tracing-beam {
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 220px;
+  z-index: 100;
+  pointer-events: none;
+  display: flex;
+  align-items: stretch;
+}
+
+/* ---------- SVG Path ---------- */
+.tracing-beam__svg {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: visible;
+}
+
+/* Background track path — dim */
+.tracing-beam__path-bg {
+  fill: none;
+  stroke: var(--stroke);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Lit / glow path — clipped to scroll progress */
+.tracing-beam__path-glow {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: url(#beamBlur);
+  transition: stroke-dashoffset 0.08s linear;
+}
+
+.tracing-beam__path-core {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: stroke-dashoffset 0.08s linear;
+}
+
+/* ---------- Dot Circles ---------- */
+.tracing-beam__dots {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 220px;
+  height: 100%;
+  pointer-events: none;
+}
+
+.tracing-beam__dot {
+  position: absolute;
+  /* left/top set by JS */
+  transform: translate(-50%, -50%);
+  pointer-events: auto;
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 80px;
+  height: 34px;
+  padding: 0 16px;
+  border-radius: 999px;
+
+  border: 2px solid var(--stroke);
+  background: var(--bg);
+  color: var(--text-secondary);
+
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  user-select: none;
+
+  transition: border-color 0.3s ease,
+              background 0.3s ease,
+              color 0.3s ease,
+              box-shadow 0.3s ease,
+              transform 0.2s ease;
+}
+
+.tracing-beam__dot:hover {
+  border-color: var(--accent);
+  transform: translate(-50%, -50%) scale(1.06);
+}
+
+/* Active: user is on or has scrolled past this section */
+.tracing-beam__dot.is-active {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--bg);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 15%, transparent),
+              0 0 16px color-mix(in srgb, var(--accent) 20%, transparent);
+}
+
+/* ---------- Responsive: hide on small screens ---------- */
+@media (max-width: 768px) {
+  .tracing-beam {
+    display: none !important;
+  }
+}
