@@ -36,6 +36,21 @@
     grid-template-columns: 1fr;
   }
 
+  .methodology-timeline {
+    --method-lane-x: 22px;
+    --method-pad-left: 58px;
+    --method-dot-size: 30px;
+    padding-left: var(--method-pad-left);
+  }
+
+  .methodology-timeline::before {
+    left: calc(var(--method-lane-x) - 1px);
+  }
+
+  .methodology-timeline::after {
+    left: calc(var(--method-lane-x) - 11px);
+  }
+
   .proof__inner {
     grid-template-columns: 1fr;
   }
@@ -60,6 +75,11 @@
 
   .reveal {
     transition: none;
+  }
+
+  .methodology-timeline::after {
+    animation: none;
+    opacity: 0;
   }
 }
 

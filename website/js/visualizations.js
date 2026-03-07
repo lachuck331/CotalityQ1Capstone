@@ -168,16 +168,16 @@
         const rowGap = 72;
 
         const stack = [
-          { id: "src", label: "Data Sources", detail: "Notebook pipeline starts from ca_combined_data.parquet with monthly climate (ppt/tdmean/tmax/vpdmax), burned_area, ndvi, landcover, and terrain features." },
-          { id: "src_proc", label: "Per-source Preprocess", detail: "Data prep notebook optimizes dtypes (UInt8/UInt16/Float32), audits nulls, and filters rows where all columns are null." },
-          { id: "combine", label: "Combine", detail: "Combined table is sorted by lat/lon/year/month and then transformed into model-ready feature/target parquet files." },
-          { id: "miss", label: "Missingness", detail: "EDA reports NDVI missingness in Jan-2000 as by design; January 2000 is removed and remaining missingness is handled through filtering/feature construction." },
-          { id: "transform", label: "Transformations", detail: "Create 1-step burned_area lag by location, log-transform ppt/vpdmax/slope (+epsilon), one-hot encode 20 landcover classes, and scale selected numeric columns." },
-          { id: "split", label: "Train/Test/Validation", detail: "Validation set is years 2005-2009; non-validation years are randomly shuffled into 70/30 train/test using seed 42." },
-          { id: "base", label: "Baseline Models", detail: "Executed CA baselines are cuML LogisticRegression(max_iter=500, class_weight='balanced') and cuML LinearSVC(max_iter=1000); RF section exists but was not executed." },
-          { id: "xgb_base", label: "Base XGBoost", detail: "Untuned CUDA XGBoost baseline: test ROC-AUC 0.8621 / PR-AUC 0.2272, temporal validation ROC-AUC 0.8512 / PR-AUC 0.0088." },
-          { id: "optuna", label: "Optuna XGBoost", detail: "Optuna runs 10 trials maximizing PR-AUC and tunes booster, learning_rate, max_depth, min_child_weight, gamma, regularization, and sampling parameters." },
-          { id: "result", label: "Results", detail: "Final tuned XGBoost: test ROC-AUC 0.9448 / PR-AUC 0.5548; temporal validation ROC-AUC 0.8425 / PR-AUC 0.0113. Baselines are substantially lower in PR-AUC." },
+          { id: "src", label: "Data Sources", detail: "The modeling workflow combines monthly PRISM climate, NASA MODIS NDVI, USGS NLCD landcover, USGS DEM terrain, and MTBS fire-perimeter labels into ca_combined_data.parquet for statewide California." },
+          { id: "src_proc", label: "Per-source Preprocess", detail: "In data preparation, column types are optimized (UInt8, UInt16, and Float32), nulls are audited, and rows that are entirely null are removed." },
+          { id: "combine", label: "Combine", detail: "The statewide table is sorted by latitude, longitude, year, and month, and then converted into model-ready feature and target parquet files." },
+          { id: "miss", label: "Missingness", detail: "EDA identifies January 2000 NDVI values as by-design missingness, so that month is removed and remaining missingness is handled during downstream filtering and feature construction." },
+          { id: "transform", label: "Transformations", detail: "Feature engineering adds a one-step burned_area lag by location, applies log transforms to ppt, vpdmax, and slope (with epsilon), one-hot encodes 20 landcover classes, and scales selected numeric columns." },
+          { id: "split", label: "Train/Test/Validation", detail: "The temporal holdout set is defined as 2005-2009, and all remaining years are shuffled and split 70/30 into train and test sets with seed 42." },
+          { id: "base", label: "Baseline Models", detail: "Baseline comparisons use cuML LogisticRegression(max_iter=500, class_weight='balanced') and cuML LinearSVC(max_iter=1000); Random Forest was excluded from the final California baseline run due to large computational requirements." },
+          { id: "xgb_base", label: "Base XGBoost", detail: "The untuned CUDA XGBoost baseline achieves test ROC-AUC 0.8621 and PR-AUC 0.2272, and on the 2005-2009 temporal holdout it achieves ROC-AUC 0.8512 and PR-AUC 0.0088." },
+          { id: "optuna", label: "Optuna XGBoost", detail: "Optuna runs 10 trials to maximize PR-AUC, tuning booster, learning_rate, max_depth, min_child_weight, gamma, regularization, and sampling parameters." },
+          { id: "result", label: "Results", detail: "The final tuned XGBoost model reaches test ROC-AUC 0.9448 and PR-AUC 0.5548, while the 2005-2009 temporal holdout reaches ROC-AUC 0.8425 and PR-AUC 0.0113; baseline PR-AUC values remain substantially lower." },
         ];
 
         stack.forEach((n, i) => {
@@ -209,25 +209,25 @@
         const srcYs = [88, 162, 236, 310, 384];
 
         const sources = [
-          { id: "prism", label: "PRISM", detail: "PRISM-derived monthly climate predictors appear in the modeling table as ppt, tdmean, tmax, and vpdmax (later log-transforming ppt)." },
-          { id: "ndvi", label: "MODIS NDVI", detail: "NDVI is included as a monthly predictor; EDA explicitly notes Jan-2000 missingness due to satellite startup timing." },
-          { id: "nlcd", label: "NLCD", detail: "Landcover enters as a categorical class and is expanded to one-hot indicator columns in data preparation." },
-          { id: "dem", label: "USGS DEM", detail: "Terrain predictors used in modeling are elevation, slope, and aspect (with slope log-transformed during prep)." },
-          { id: "mtbs", label: "MTBS", detail: "burned_area is the binary target column; a 1-step lag feature is created by location for temporal context." },
+          { id: "prism", label: "PRISM", detail: "PRISM monthly climate rasters from the PRISM Climate Group (Oregon State University) provide ppt, tdmean, tmax, and vpdmax predictors, with ppt later log-transformed." },
+          { id: "ndvi", label: "MODIS NDVI", detail: "MODIS/Terra Vegetation Indices Monthly L3 (NASA, V061) provide NDVI vegetation signals; EDA confirms January 2000 missingness is expected due to satellite startup timing." },
+          { id: "nlcd", label: "NLCD", detail: "Annual NLCD landcover classes from the USGS-led MRLC program are incorporated as categorical predictors and expanded into one-hot indicator columns during preparation." },
+          { id: "dem", label: "USGS DEM", detail: "USGS 1 arc-second DEM tiles provide terrain-derived elevation, slope, and aspect predictors, with slope later log-transformed for modeling stability." },
+          { id: "mtbs", label: "MTBS", detail: "The Monitoring Trends in Burn Severity (MTBS) perimeter dataset (USGS/USFS) is rasterized into burned_area labels, and a one-step location-level lag is added for temporal context." },
         ].map((n, i) => ({ ...n, x: srcX, y: srcYs[i], w: sourceW, h: nodeH, kind: "source" }));
 
         const preprocess = [
-          { id: "prism_pre", label: "Subset + Monthly Align", detail: "Climate feature columns are cast/validated and carried forward as monthly predictors in the statewide table." },
-          { id: "ndvi_pre", label: "Reproject + Resample", detail: "NDVI temporal coverage is inspected in EDA and aligned with the downstream monthly modeling timeline." },
-          { id: "nlcd_pre", label: "Class Mapping", detail: "Landcover classes are mapped to named one-hot features (20 classes) for model input." },
-          { id: "dem_pre", label: "Terrain Derivation", detail: "Terrain fields are retained as continuous predictors alongside climate and vegetation features." },
-          { id: "mtbs_pre", label: "Fire Filter + Rasterize", detail: "burned_area target is prepared for supervised learning and lagged by location after temporal sorting." },
+          { id: "prism_pre", label: "Subset + Monthly Align", detail: "Climate columns are validated, typed, and aligned to the monthly statewide table used for modeling." },
+          { id: "ndvi_pre", label: "Reproject + Resample", detail: "NDVI layers are reprojected, resampled, and aligned to the monthly modeling timeline after missingness review." },
+          { id: "nlcd_pre", label: "Class Mapping", detail: "NLCD classes are mapped into named model categories and expanded into 20 one-hot encoded features." },
+          { id: "dem_pre", label: "Terrain Derivation", detail: "DEM-based terrain fields are prepared and retained as continuous predictors alongside climate and vegetation variables." },
+          { id: "mtbs_pre", label: "Fire Filter + Rasterize", detail: "MTBS perimeters are filtered and rasterized into burned_area targets, then temporally sorted for lag creation." },
         ].map((n, i) => ({ ...n, x: procX, y: srcYs[i], w: processW, h: nodeH, kind: "pre" }));
 
         const combine = {
           id: "combine",
           label: "Combine Features",
-          detail: "Notebook input is a pre-merged statewide table; prep then standardizes schema and emits X/y train, test, and validation parquet datasets.",
+          detail: "The modeling starts from a pre-merged statewide table, standardizes the schema, and writes train, test, and validation parquet artifacts for features and targets.",
           x: combineX,
           y: 236,
           w: combineW,
@@ -239,7 +239,7 @@
         const miss = {
           id: "missingness",
           label: "Missingness",
-          detail: "Null diagnostics are run before modeling; Jan-2000 NDVI is removed as by-design missingness and all-null rows are filtered out.",
+          detail: "Null diagnostics are completed before modeling; January 2000 NDVI rows are removed as by-design missingness, and all-null rows are filtered out.",
           x: Math.round(width * 0.10),
           y: middleY,
           w: stageW,
@@ -249,7 +249,7 @@
         const transforms = {
           id: "transforms",
           label: "Transformations",
-          detail: "Feature engineering in notebook: lagged burned_area, log transforms (ppt/vpdmax/slope), landcover one-hot encoding, and z-score scaling of selected columns.",
+          detail: "Feature engineering adds lagged burned_area, log transforms for ppt, vpdmax, and slope, landcover one-hot encoding, and z-score scaling for selected columns.",
           x: Math.round(width * 0.36),
           y: middleY,
           w: stageW,
@@ -259,7 +259,7 @@
         const split = {
           id: "split",
           label: "Train/Test/Validation",
-          detail: "Validation years are fixed to 2005-2009; remaining samples are shuffled and split 70/30 into train/test (seed=42).",
+          detail: "Validation years are fixed to 2005-2009, and the remaining samples are shuffled and split 70/30 into train and test sets using seed 42.",
           x: Math.round(width * 0.62),
           y: middleY,
           w: stageW,
@@ -270,7 +270,7 @@
         const logreg = {
           id: "logreg",
           label: "Logistic Regression",
-          detail: "Executed baseline: cuML LogisticRegression(max_iter=500, class_weight='balanced'). Test ROC-AUC 0.8703 and PR-AUC 0.0063.",
+          detail: "The Logistic Regression baseline uses cuML LogisticRegression(max_iter=500, class_weight='balanced') and achieves test ROC-AUC 0.8703 with PR-AUC 0.0063.",
           x: Math.round(width * 0.08),
           y: 694,
           w: baselineW,
@@ -280,7 +280,7 @@
         const rf = {
           id: "rf",
           label: "Random Forest",
-          detail: "RandomForest section is present in baseline notebook code but not executed in the finalized CA run sequence.",
+          detail: "Random Forest was excluded from the final California baseline run due to large computational requirements.",
           x: Math.round(width * 0.08),
           y: 786,
           w: baselineW,
@@ -290,7 +290,7 @@
         const svm = {
           id: "svm",
           label: "Linear SVM",
-          detail: "Executed baseline: cuML LinearSVC(max_iter=1000) with decision-function scoring. Test ROC-AUC 0.8112 and PR-AUC 0.0020.",
+          detail: "The Linear SVM baseline uses cuML LinearSVC(max_iter=1000) with decision-function scoring and achieves test ROC-AUC 0.8112 with PR-AUC 0.0020.",
           x: Math.round(width * 0.08),
           y: 878,
           w: baselineW,
@@ -300,7 +300,7 @@
         const xgbBase = {
           id: "xgb_base",
           label: "Base XGBoost",
-          detail: "Base CUDA XGBClassifier run before tuning: test ROC-AUC 0.8621 / PR-AUC 0.2272; validation ROC-AUC 0.8512 / PR-AUC 0.0088.",
+          detail: "Before tuning, the base CUDA XGBClassifier achieves test ROC-AUC 0.8621 and PR-AUC 0.2272, while the 2005-2009 temporal holdout reaches ROC-AUC 0.8512 and PR-AUC 0.0088.",
           x: Math.round(width * 0.28),
           y: 786,
           w: xgbW + 8,
@@ -310,7 +310,7 @@
         const optuna = {
           id: "optuna",
           label: "Optuna XGBoost",
-          detail: "Optuna study (10 trials, maximize PR-AUC) tunes XGBoost hyperparameters, then best params are used to fit final_xgb_clf on training data.",
+          detail: "An Optuna study with 10 trials maximizes PR-AUC, and the best hyperparameters are used to train final_xgb_clf on the training split.",
           x: Math.round(width * 0.50),
           y: 786,
           w: optunaW,
@@ -320,7 +320,7 @@
         const results = {
           id: "results",
           label: "Results",
-          detail: "Final tuned XGBoost: test ROC-AUC 0.9448 / PR-AUC 0.5548; temporal validation ROC-AUC 0.8425 / PR-AUC 0.0113. Baseline PR-AUC remains much lower.",
+          detail: "The final tuned XGBoost model reaches test ROC-AUC 0.9448 and PR-AUC 0.5548, while the 2005-2009 temporal holdout reaches ROC-AUC 0.8425 and PR-AUC 0.0113; baseline PR-AUC values remain much lower.",
           x: width - resultW - 94,
           y: 786,
           w: resultW,
@@ -583,6 +583,14 @@
     let fullData = [];
     let showAll = false;
     let observed = false;
+    let isToggleAnimating = false;
+    let svg = null;
+    let xAxisG = null;
+    let yAxisG = null;
+    let barGroup = null;
+    let labelGroup = null;
+
+    container.style.overflow = "hidden";
 
     const groupColor = (feature) => {
       if (feature.startsWith("landcover_")) return "#8f6fcf";
@@ -596,34 +604,33 @@
       .replace(/^landcover_/, "landcover: ")
       .replaceAll("_", " ");
 
-    const render = (animate = false) => {
-      if (!fullData.length) return;
-      const data = (showAll ? fullData : fullData.slice(0, 15));
+    const wait = (ms) => new Promise((resolve) => window.setTimeout(resolve, ms));
+
+    const ensureChart = () => {
+      if (svg) return;
+      container.innerHTML = "";
+      svg = d3.select(container)
+        .append("svg")
+        .attr("role", "img")
+        .attr("aria-label", "Tuned model feature importance")
+        .style("width", "100%")
+        .style("height", "0px")
+        .style("display", "block");
+
+      xAxisG = svg.append("g").attr("class", "fi-axis fi-axis--x");
+      yAxisG = svg.append("g").attr("class", "fi-axis fi-axis--y");
+      barGroup = svg.append("g").attr("class", "fi-bars");
+      labelGroup = svg.append("g").attr("class", "fi-values");
+      container.style.height = "0px";
+    };
+
+    const getData = (all = showAll) => (all ? fullData : fullData.slice(0, 15));
+
+    const getState = (data) => {
       const width = Math.max(320, container.clientWidth || 900);
       const margin = { top: 14, right: 68, bottom: 28, left: 180 };
       const rowHeight = 24;
       const height = margin.top + margin.bottom + data.length * rowHeight;
-
-      container.innerHTML = "";
-      const svg = d3.select(container)
-        .append("svg")
-        .attr("viewBox", `0 0 ${width} ${height}`)
-        .attr("role", "img")
-        .attr("aria-label", "Tuned model feature importance");
-
-      /* ---- Gradient defs for bars ---- */
-      const gradDefs = svg.append("defs");
-      data.forEach((d) => {
-        const c = groupColor(d.feature);
-        const gid = "fiGrad-" + d.feature.replace(/[^a-zA-Z0-9]/g, "_");
-        const lg = gradDefs.append("linearGradient")
-          .attr("id", gid)
-          .attr("x1", "0%").attr("y1", "0%")
-          .attr("x2", "100%").attr("y2", "0%");
-        lg.append("stop").attr("offset", "0%").attr("stop-color", c).attr("stop-opacity", 0.5);
-        lg.append("stop").attr("offset", "100%").attr("stop-color", c).attr("stop-opacity", 1);
-      });
-
       const x = d3.scaleLinear()
         .domain([0, d3.max(data, (d) => d.value) || 1])
         .nice()
@@ -632,37 +639,107 @@
         .domain(data.map((d) => d.feature))
         .range([margin.top, height - margin.bottom])
         .padding(0.25);
+      return { data, width, height, margin, x, y };
+    };
 
+    const setHeights = (
+      state,
+      {
+        containerMs = null,
+        svgMs = null,
+        updateContainer = true,
+        updateSvg = true
+      } = {}
+    ) => {
+      if (updateSvg) {
+        svg.attr("viewBox", `0 0 ${state.width} ${state.height}`);
+        if (svgMs === null) {
+          svg.style("height", `${state.height}px`);
+        } else {
+          svg.transition().duration(svgMs).ease(d3.easeCubicInOut).style("height", `${state.height}px`);
+        }
+      }
+      if (updateContainer) {
+        if (containerMs === null) {
+          container.style.height = `${state.height}px`;
+        } else {
+          d3.select(container).transition().duration(containerMs).ease(d3.easeCubicInOut).style("height", `${state.height}px`);
+        }
+      }
+    };
+
+    const animateContainerHeight = (state, ms = 260) => {
+      const transition = d3.select(container)
+        .transition()
+        .duration(ms)
+        .ease(d3.easeCubicInOut)
+        .style("height", `${state.height}px`);
+      return transition.end().catch(() => undefined);
+    };
+
+    const applyAxes = (state, ms = 0) => {
       const gridColor = cssVar("--stroke2", "rgba(0,0,0,.08)");
       const axisColor = cssVar("--text-secondary", "#666");
+      if (ms > 0) {
+        const xTransition = xAxisG.transition().duration(ms).ease(d3.easeCubicInOut);
+        const yTransition = yAxisG.transition().duration(ms).ease(d3.easeCubicInOut);
+
+        xTransition
+          .attr("transform", `translate(0,${state.height - state.margin.bottom})`)
+          .call(d3.axisBottom(state.x).ticks(6))
+          .call((g) => g.selectAll("text").attr("fill", axisColor).attr("font-size", 11))
+          .call((g) => g.selectAll("path,line").attr("stroke", gridColor));
+
+        yTransition
+          .attr("transform", `translate(${state.margin.left},0)`)
+          .call(d3.axisLeft(state.y).tickFormat((d) => prettyFeature(d)))
+          .call((g) => g.selectAll("text").attr("fill", axisColor).attr("font-size", 11))
+          .call((g) => g.selectAll("path,line").attr("stroke", gridColor));
+
+        return Promise.allSettled([xTransition.end(), yTransition.end()]);
+      }
+
+      xAxisG
+        .attr("transform", `translate(0,${state.height - state.margin.bottom})`)
+        .call(d3.axisBottom(state.x).ticks(6))
+        .call((g) => g.selectAll("text").attr("fill", axisColor).attr("font-size", 11))
+        .call((g) => g.selectAll("path,line").attr("stroke", gridColor));
+
+      yAxisG
+        .attr("transform", `translate(${state.margin.left},0)`)
+        .call(d3.axisLeft(state.y).tickFormat((d) => prettyFeature(d)))
+        .call((g) => g.selectAll("text").attr("fill", axisColor).attr("font-size", 11))
+        .call((g) => g.selectAll("path,line").attr("stroke", gridColor));
+
+      return Promise.resolve();
+    };
+
+    const updateMarks = (
+      state,
+      { ms = 0, hideNew = false, stagger = 0, removeExiting = true } = {}
+    ) => {
       const valueColor = cssVar("--text", "#111");
 
-      svg.append("g")
-        .attr("transform", `translate(0,${height - margin.bottom})`)
-        .call(d3.axisBottom(x).ticks(6))
-        .call((g) => g.selectAll("text").attr("fill", axisColor).attr("font-size", 11))
-        .call((g) => g.selectAll("path,line").attr("stroke", gridColor));
+      const bars = barGroup.selectAll("rect").data(state.data, (d) => d.feature);
+      if (removeExiting) {
+        const exitSel = ms > 0 ? bars.exit().transition().duration(ms).ease(d3.easeCubicInOut) : bars.exit();
+        exitSel.attr("width", 0).attr("opacity", 0).remove();
+      }
 
-      svg.append("g")
-        .attr("transform", `translate(${margin.left},0)`)
-        .call(d3.axisLeft(y).tickFormat((d) => prettyFeature(d)))
-        .call((g) => g.selectAll("text").attr("fill", axisColor).attr("font-size", 11))
-        .call((g) => g.selectAll("path,line").attr("stroke", gridColor));
-
-      const barGroup = svg.append("g").attr("class", "fi-bars");
-      const bars = barGroup
-        .selectAll("rect")
-        .data(data)
-        .join("rect")
-        .attr("class", "fi-bar")
-        .attr("x", x(0))
-        .attr("y", (d) => y(d.feature))
-        .attr("height", y.bandwidth())
+      const barsEnter = bars.enter()
+        .append("rect")
+        .attr("class", "fi-bar fi-new")
+        .attr("x", state.x(0))
+        .attr("y", (d) => state.y(d.feature))
+        .attr("height", state.y.bandwidth())
         .attr("rx", 4)
-        .attr("fill", (d) => {
-          const gid = "fiGrad-" + d.feature.replace(/[^a-zA-Z0-9]/g, "_");
-          return `url(#${gid})`;
-        })
+        .attr("fill", (d) => groupColor(d.feature))
+        .attr("width", 0)
+        .attr("opacity", hideNew ? 0 : 1);
+
+      const barsMerge = barsEnter
+        .merge(bars)
+        .attr("fill", (d) => groupColor(d.feature))
         .on("mouseenter", function (event, d) {
           barGroup.classed("fi-bars--hovered", true);
           d3.select(this).classed("fi-bar--active", true);
@@ -683,45 +760,150 @@
           tooltip.hidden = true;
         });
 
-      if (animate) {
-        bars.attr("width", 0)
-          .transition()
-          .duration(850)
-          .delay((d, i) => i * 40)
-          .ease(d3.easeCubicOut)
-          .attr("width", (d) => Math.max(0, x(d.value) - x(0)));
-      } else {
-        bars.attr("width", (d) => Math.max(0, x(d.value) - x(0)));
+      const barSel = ms > 0 ? barsMerge.transition().duration(ms).ease(d3.easeCubicInOut) : barsMerge;
+      if (ms > 0 && stagger > 0) barSel.delay((d, i) => i * stagger);
+      barSel
+        .attr("x", state.x(0))
+        .attr("y", (d) => state.y(d.feature))
+        .attr("height", state.y.bandwidth())
+        .attr("width", function (d) {
+          if (hideNew && this.classList.contains("fi-new")) return 0;
+          return Math.max(0, state.x(d.value) - state.x(0));
+        })
+        .attr("opacity", function () {
+          if (hideNew && this.classList.contains("fi-new")) return 0;
+          return 1;
+        })
+        .on("end", function () {
+          this.classList.remove("fi-new");
+        });
+
+      const labels = labelGroup.selectAll("text").data(state.data, (d) => d.feature);
+      if (removeExiting) {
+        const labelsExit = ms > 0 ? labels.exit().transition().duration(ms).ease(d3.easeCubicInOut) : labels.exit();
+        labelsExit.attr("opacity", 0).remove();
       }
 
-      const valueLabels = svg.append("g")
-        .selectAll("text")
-        .data(data)
-        .join("text")
-        .attr("x", (d) => x(d.value) + 6)
-        .attr("y", (d) => (y(d.feature) || 0) + y.bandwidth() / 2 + 4)
+      const labelsEnter = labels.enter()
+        .append("text")
+        .attr("class", "fi-new-label")
+        .attr("x", (d) => state.x(d.value) + 6)
+        .attr("y", (d) => (state.y(d.feature) || 0) + state.y.bandwidth() / 2 + 4)
         .attr("fill", valueColor)
         .attr("font-size", 10)
+        .attr("opacity", hideNew ? 0 : 1)
         .text((d) => d.value.toFixed(4));
 
-      if (animate) {
-        valueLabels
-          .attr("opacity", 0)
-          .transition()
-          .duration(350)
-          .delay((d, i) => 400 + i * 40)
-          .ease(d3.easeCubicOut)
-          .attr("opacity", 1);
-      }
+      const labelsMerge = labelsEnter.merge(labels).text((d) => d.value.toFixed(4));
+      const labelSel = ms > 0 ? labelsMerge.transition().duration(ms).ease(d3.easeCubicInOut) : labelsMerge;
+      if (ms > 0 && stagger > 0) labelSel.delay((d, i) => i * stagger);
+      labelSel
+        .attr("x", (d) => state.x(d.value) + 6)
+        .attr("y", (d) => (state.y(d.feature) || 0) + state.y.bandwidth() / 2 + 4)
+        .attr("opacity", function () {
+          if (hideNew && this.classList.contains("fi-new-label")) return 0;
+          return 1;
+        })
+        .on("end", function () {
+          this.classList.remove("fi-new-label");
+        });
     };
 
-    const rerender = debounce(() => render(false), 180);
+    const depopulateTo = async (targetData, ms = 320, stagger = 18) => {
+      const keep = new Set(targetData.map((d) => d.feature));
+      const dropOrder = [];
+
+      barGroup.selectAll("rect")
+        .filter((d) => !keep.has(d.feature))
+        .each(function (d) {
+          const y = Number.parseFloat(this.getAttribute("y")) || 0;
+          dropOrder.push({ feature: d.feature, y });
+        });
+
+      dropOrder.sort((a, b) => b.y - a.y);
+      const delayByFeature = new Map(
+        dropOrder.map((item, index) => [item.feature, index * stagger])
+      );
+
+      const barsToDrop = barGroup.selectAll("rect")
+        .filter((d) => !keep.has(d.feature))
+        .transition()
+        .delay((d) => delayByFeature.get(d.feature) || 0)
+        .duration(ms)
+        .ease(d3.easeCubicInOut)
+        .attr("width", 0)
+        .attr("opacity", 0)
+        .remove();
+
+      const labelsToDrop = labelGroup.selectAll("text")
+        .filter((d) => !keep.has(d.feature))
+        .transition()
+        .delay((d) => delayByFeature.get(d.feature) || 0)
+        .duration(ms)
+        .ease(d3.easeCubicInOut)
+        .attr("opacity", 0)
+        .remove();
+
+      const barsCount = barsToDrop.size ? barsToDrop.size() : 0;
+      const labelsCount = labelsToDrop.size ? labelsToDrop.size() : 0;
+      const orderedCount = dropOrder.length;
+      const maxCount = Math.max(barsCount, labelsCount, orderedCount, 1);
+      await wait(ms + ((maxCount - 1) * stagger) + 40);
+    };
+
+    const renderImmediate = () => {
+      if (!fullData.length) return;
+      ensureChart();
+      const state = getState(getData());
+      setHeights(state, { containerMs: null, svgMs: null });
+      applyAxes(state, 0);
+      updateMarks(state, { ms: 0, hideNew: false, removeExiting: true });
+    };
+
+    const rerender = debounce(() => {
+      if (isToggleAnimating) return;
+      renderImmediate();
+    }, 180);
     window.addEventListener("resize", rerender, { passive: true });
 
-    toggleBtn.addEventListener("click", () => {
-      showAll = !showAll;
-      toggleBtn.textContent = showAll ? "Show Top 15" : "Show All Features";
-      render(true);
+    toggleBtn.addEventListener("click", async () => {
+      if (isToggleAnimating || !fullData.length) return;
+      isToggleAnimating = true;
+      const nextShowAll = !showAll;
+      const expanding = nextShowAll;
+      toggleBtn.textContent = nextShowAll ? "Show Top 15" : "Show All Features";
+
+      ensureChart();
+
+      if (expanding) {
+        const target = fullData;
+        const targetState = getState(target);
+
+        await animateContainerHeight(targetState, 320);
+
+        setHeights(targetState, { containerMs: null, svgMs: null, updateContainer: false, updateSvg: true });
+        const axisPhase = applyAxes(targetState, 320);
+        updateMarks(targetState, { ms: 320, hideNew: true, removeExiting: true });
+        await Promise.all([axisPhase, wait(340)]);
+
+        updateMarks(targetState, { ms: 520, hideNew: false, removeExiting: false, stagger: 20 });
+        await wait(560);
+      } else {
+        const target = fullData.slice(0, 15);
+        const targetState = getState(target);
+
+        await depopulateTo(target, 380, 24);
+
+        const axisPhase = applyAxes(targetState, 320);
+        updateMarks(targetState, { ms: 320, hideNew: false, removeExiting: true });
+        await Promise.all([axisPhase, wait(340)]);
+
+        setHeights(targetState, { containerMs: null, svgMs: null, updateContainer: false, updateSvg: true });
+        await animateContainerHeight(targetState, 320);
+      }
+
+      showAll = nextShowAll;
+      isToggleAnimating = false;
     });
 
     fetch("./data/ca_feature_importance.json")
@@ -737,7 +919,12 @@
         const start = () => {
           if (observed) return;
           observed = true;
-          render(true);
+          ensureChart();
+          const initialState = getState(getData(false));
+          setHeights(initialState, { containerMs: null, svgMs: null });
+          applyAxes(initialState, 0);
+          updateMarks(initialState, { ms: 0, hideNew: true, removeExiting: true });
+          updateMarks(initialState, { ms: 720, hideNew: false, removeExiting: false, stagger: 20 });
         };
 
         setupObserver(container, start);

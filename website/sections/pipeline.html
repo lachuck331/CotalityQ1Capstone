@@ -2,8 +2,14 @@
   <div class="section__head reveal">
     <h2>Pipeline</h2>
     <p>
-      End-to-end processing from raw public datasets to monthly model outputs. The graph below summarizes the
-      workflow used in this project.
+      The pipeline integrates PRISM climate, MODIS NDVI, NLCD landcover, USGS DEM terrain, and MTBS fire perimeters
+      into a single statewide monthly analysis table. Each source is aligned to a common 800m grid and transformed
+      into model-ready predictors and labels.
+    </p>
+    <p>
+      The workflow then applies missingness handling and feature engineering, creates a temporal holdout
+      (2005–2009), benchmarks baseline models, and trains tuned XGBoost for rare-event ranking. Click nodes in the
+      graph for source provenance, processing details, and metric summaries.
     </p>
   </div>
 

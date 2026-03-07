@@ -161,6 +161,52 @@ const UI = {
     onScroll();
   },
 
+  initMethodologyTimeline() {
+    const timelines = Array.from(document.querySelectorAll(".methodology-timeline"));
+    if (!timelines.length) return;
+
+    const updateOne = (timeline) => {
+      const dots = Array.from(timeline.querySelectorAll(".methodology-step__dot"));
+      if (dots.length < 2) return;
+
+      const timelineRect = timeline.getBoundingClientRect();
+      const centerY = (el) => {
+        const r = el.getBoundingClientRect();
+        return (r.top + r.height / 2) - timelineRect.top;
+      };
+
+      const firstCenter = Math.max(0, centerY(dots[0]));
+      const lastCenter = Math.min(timelineRect.height, centerY(dots[dots.length - 1]));
+      const bottomOffset = Math.max(0, timelineRect.height - lastCenter);
+
+      timeline.style.setProperty("--method-line-top", `${firstCenter}px`);
+      timeline.style.setProperty("--method-line-bottom", `${bottomOffset}px`);
+    };
+
+    let framePending = false;
+    const updateAll = () => {
+      if (framePending) return;
+      framePending = true;
+      requestAnimationFrame(() => {
+        timelines.forEach(updateOne);
+        framePending = false;
+      });
+    };
+
+    window.addEventListener("resize", updateAll, { passive: true });
+    window.addEventListener("scroll", updateAll, { passive: true });
+    window.addEventListener("load", updateAll);
+    document.addEventListener("visibilitychange", updateAll);
+
+    timelines.forEach((timeline) => {
+      timeline.addEventListener("transitionend", updateAll);
+    });
+
+    updateAll();
+    setTimeout(updateAll, 420);
+    setTimeout(updateAll, 900);
+  },
+
   initAll() {
     this.initMobileMenu();
     this.initSmoothScroll();
@@ -168,6 +214,7 @@ const UI = {
     this.initYear();
     this.initFloatingNav();
     this.initReveal();
+    this.initMethodologyTimeline();
     this.initTilt();
     this.initCounters();
   }

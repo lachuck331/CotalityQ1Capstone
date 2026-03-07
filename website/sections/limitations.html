@@ -2,9 +2,14 @@
   <div class="section__head reveal">
     <h2>Limitations & Next Steps</h2>
     <p>
-      The tuned model improves random-split test performance, but temporal holdout performance drops sharply.
-      This suggests limited generalization under severe class imbalance and potential overfitting to training-era
-      patterns.
+      Relative to the best baseline, tuned XGBoost improves temporal validation PR-AUC but remains very low (0.0113),
+      while random-split performance is much higher. This gap indicates sensitivity to nonstationarity and severe
+      class imbalance.
+    </p>
+    <p>
+      For stakeholders, the current system should be interpreted as a research-stage risk signal, not a finalized
+      operational trigger. The next phase focuses on improving out-of-time reliability and reducing false confidence
+      in minority-event predictions.
     </p>
   </div>
 
@@ -13,7 +18,14 @@
       <div class="stack__icon" aria-hidden="true">⚠️</div>
       <div>
         <div class="stack__t">Current Limitation</div>
-        <div class="stack__p">Temporal validation PR-AUC remains very low despite strong random-split metrics.</div>
+        <div class="stack__p">Temporal validation PR-AUC is 0.0113, which is still too low for reliable rare-event deployment without calibration and threshold tuning.</div>
+      </div>
+    </div>
+    <div class="stack__item">
+      <div class="stack__icon" aria-hidden="true">⚠️</div>
+      <div>
+        <div class="stack__t">Generalization Caveat</div>
+        <div class="stack__p">Random-split gains do not fully transfer to temporal holdout. This indicates sensitivity to distribution shift, threshold choice, and rare-event class imbalance.</div>
       </div>
     </div>
     <div class="stack__item">

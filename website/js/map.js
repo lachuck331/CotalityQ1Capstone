@@ -1,4 +1,5 @@
-const { MapboxOverlay, ScatterplotLayer } = deck;
+const deckApi = globalThis.deck || {};
+const { MapboxOverlay, ScatterplotLayer } = deckApi;
 
 let currentMapbox = null;
 let currentDeckOverlay = null;
@@ -84,6 +85,16 @@ window.initDemo = function () {
 
     // Check if demo sections are fully loaded
     if (!container || !slider || !layerSelect) return;
+
+    if (!globalThis.mapboxgl || !MapboxOverlay || !ScatterplotLayer) {
+        console.warn("Map dependencies unavailable (mapboxgl/deck.gl). Skipping demo map initialization.");
+        const mapLoading = document.getElementById('mapLoading');
+        if (mapLoading) {
+            mapLoading.textContent = "Interactive map dependencies failed to load.";
+            mapLoading.style.display = 'block';
+        }
+        return;
+    }
 
     const timeMonthSelect = document.getElementById('timeMonth');
     const timeYearSelect = document.getElementById('timeYear');

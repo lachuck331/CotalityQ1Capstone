@@ -11,6 +11,14 @@
   gap: 12px;
 }
 
+.intro-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.intro-grid .card {
+  height: 100%;
+}
+
 /* ---------- Cards (generic) ---------- */
 .card {
   border-radius: var(--r);
@@ -265,6 +273,103 @@
   grid-template-columns: 50px 1fr;
   gap: 10px;
   padding: 10px 0;
+}
+
+/* ---------- Methodology Timeline ---------- */
+.methodology-timeline {
+  --method-lane-x: 30px;
+  --method-pad-left: 74px;
+  --method-dot-size: 34px;
+  position: relative;
+  display: grid;
+  gap: 14px;
+  padding-left: var(--method-pad-left);
+  isolation: isolate;
+}
+
+.methodology-timeline::before {
+  content: "";
+  position: absolute;
+  left: calc(var(--method-lane-x) - 1px);
+  top: var(--method-line-top, 12px);
+  bottom: var(--method-line-bottom, 12px);
+  width: 2px;
+  border-radius: 99px;
+  background: linear-gradient(to bottom,
+      var(--stroke),
+      color-mix(in srgb, var(--accent) 40%, var(--stroke)));
+  z-index: 1;
+}
+
+.methodology-timeline::after {
+  content: "";
+  position: absolute;
+  left: calc(var(--method-lane-x) - 11px);
+  top: var(--method-line-top, 12px);
+  bottom: var(--method-line-bottom, 12px);
+  width: 22px;
+  pointer-events: none;
+  background: radial-gradient(closest-side,
+      color-mix(in srgb, var(--accent) 62%, #ffffff 38%) 0%,
+      color-mix(in srgb, var(--accent) 28%, transparent) 55%,
+      transparent 100%);
+  background-repeat: no-repeat;
+  background-size: 100% 92px;
+  filter: blur(4px);
+  opacity: 0.65;
+  animation: methodologyRunwayFlow 3.1s linear infinite;
+  z-index: 0;
+}
+
+.methodology-step {
+  position: relative;
+  overflow: visible;
+  z-index: 2;
+}
+
+.methodology-step .card__top {
+  gap: 0;
+}
+
+.methodology-step__dot {
+  position: absolute;
+  left: calc(var(--method-lane-x) - var(--method-pad-left) - (var(--method-dot-size) / 2));
+  top: 50%;
+  transform: translateY(-50%);
+  width: var(--method-dot-size);
+  height: var(--method-dot-size);
+  border-radius: 999px;
+  border: 2px solid var(--accent);
+  background: color-mix(in srgb, var(--bg) 90%, transparent);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--bg) 75%, transparent);
+  z-index: 3;
+}
+
+@keyframes methodologyRunwayFlow {
+  from {
+    background-position: 0 -104px;
+    opacity: 0;
+  }
+
+  12% {
+    opacity: 1;
+  }
+
+  88% {
+    opacity: 1;
+  }
+
+  to {
+    background-position: 0 calc(100% + 104px);
+    opacity: 0;
+  }
 }
 
 /* ---------- D3 / Results Additions ---------- */
