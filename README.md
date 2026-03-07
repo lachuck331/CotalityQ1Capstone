@@ -38,42 +38,45 @@ This project integrates multiple public geospatial datasets:
     6) Originally scoped to San Diego County, now expanded to statewide California
 
 ## Repository Structure
-.
-├── ca_data_processing/                  # Scripts for building the statewide California dataset
-│   ├── combine_dataset.py               # Merges processed layers into the final modeling dataset
-│   ├── download_ca_state.py             # Downloads California boundary and spatial domain data
-│   ├── download_nlcd_annual.py          # Downloads NLCD annual landcover data
-│   ├── download_prism_data.py           # Downloads PRISM climate data
-│   ├── process_dem_data.py              # Processes DEM terrain data and derives elevation features
-│   ├── process_mbts_data.py             # Processes MTBS wildfire perimeter data into burn labels
-│   └── process_ndvi_data.py             # Processes MODIS NDVI vegetation data
-│
-├── sd_data_processing/                  # Original San Diego County preprocessing workflow
-│   ├── combine_dataset.py               # Combines San Diego County processed datasets
-│   ├── download_nlcd_annual.py          # Downloads NLCD data for San Diego County
-│   ├── download_prism_data.py           # Downloads PRISM climate data for San Diego County
-│   ├── download_sd_county.py            # Downloads San Diego spatial domain files
-│   ├── process_dem_data.py              # Processes DEM terrain layers
-│   ├── process_mtbs_data.py             # Processes wildfire perimeter data
-│   └── process_ndvi_data.py             # Processes NDVI vegetation data
-│
-├── data/
-│   └── combined_data.parquet            # Combined statewide dataset used for modeling
-│
-├── ca_baseline.ipynb                    # Baseline model experiments for California data
-├── ca_dataprep.ipynb                    # Data preparation and feature engineering notebook
-├── ca_eda.ipynb                         # Exploratory Data Analysis for California dataset
-├── ca_xgboost.ipynb                     # XGBoost modeling and evaluation
-│
-├── eda.ipynb                            # Earlier exploratory analysis notebook
-├── model.ipynb                          # Initial modeling experiments
-│
-├── environment.yml                      # Conda environment definition with package versions
-├── pyproject.toml                       # Project dependency and package configuration
-├── .python-version                      # Python version specification
-├── .gitignore                           # Files and directories excluded from Git tracking
-│
-└── README.md                            # Project documentation and reproducibility instructions
+
+| Path | Description |
+|---|---|
+| `ca_data_processing/` | Scripts for building the statewide California dataset |
+| `ca_data_processing/combine_dataset.py` | Merges processed layers into the final modeling dataset |
+| `ca_data_processing/download_ca_state.py` | Downloads California boundary and spatial domain data |
+| `ca_data_processing/download_nlcd_annual.py` | Downloads NLCD annual landcover data |
+| `ca_data_processing/download_prism_data.py` | Downloads PRISM climate data |
+| `ca_data_processing/process_dem_data.py` | Processes DEM terrain data and derives elevation features |
+| `ca_data_processing/process_mbts_data.py` | Processes MTBS wildfire perimeter data into burn labels |
+| `ca_data_processing/process_ndvi_data.py` | Processes MODIS NDVI vegetation data |
+| `sd_data_processing/` | Original San Diego County preprocessing workflow from the earlier project scope |
+| `sd_data_processing/combine_dataset.py` | Combines San Diego County processed datasets |
+| `sd_data_processing/download_nlcd_annual.py` | Downloads NLCD data for San Diego County |
+| `sd_data_processing/download_prism_data.py` | Downloads PRISM climate data for San Diego County |
+| `sd_data_processing/download_sd_county.py` | Downloads San Diego spatial domain files |
+| `sd_data_processing/process_dem_data.py` | Processes DEM terrain layers |
+| `sd_data_processing/process_mtbs_data.py` | Processes wildfire perimeter data |
+| `sd_data_processing/process_ndvi_data.py` | Processes NDVI vegetation data |
+| `data/` | Stores generated datasets used for downstream analysis |
+| `data/combined_data.parquet` | Combined statewide dataset used for modeling |
+| `ca_baseline.ipynb` | Baseline model experiments for California data |
+| `ca_dataprep.ipynb` | Data preparation and feature engineering notebook |
+| `ca_eda.ipynb` | Exploratory Data Analysis for the California dataset |
+| `ca_xgboost.ipynb` | XGBoost modeling and evaluation notebook |
+| `eda.ipynb` | Earlier exploratory analysis notebook |
+| `model.ipynb` | Initial modeling experiments |
+| `environment.yml` | Conda environment definition with package versions |
+| `pyproject.toml` | Project dependency and package configuration |
+| `.python-version` | Python version specification |
+| `.gitignore` | Files and directories excluded from Git tracking |
+| `README.md` | Project documentation and reproducibility instructions |
+
+The repository is organized to separate preprocessing pipelines, notebooks, generated data, and environment configuration.
+
+- `ca_data_processing/` contains the main statewide California preprocessing workflow used in the current version of the project.
+- `sd_data_processing/` contains the earlier San Diego County workflow from the original project scope.
+- The `ca_*.ipynb` notebooks contain California-specific data preparation, exploratory analysis, baseline modeling, and XGBoost experiments.
+- `environment.yml` and `pyproject.toml` provide the information needed to recreate the project environment.
 
 ## Workflow
 1. Data Preprocessing
