@@ -1,11 +1,25 @@
 
+# California Wildfire Frequency Prediction
 
-
+Authors: _Stuti Verma_, _Gahn Wuwong_, _Diego Arevalo Fernandez_, _Lacha Barton-Gluzman_  
 Mentors: _Ilyes Meftah_, _Aaron Bagnell_
 
+## Project Overview
 Traditional wildfire burn probability assessment often relies on computationally expensive physical fire spread simulations, static fuel representations, and limited historical ignition modeling. This project explores a complementary statistical learning approach that estimates historical wildfire burn probabilities using widely available geospatial, climatic, vegetation, and topographic data. We construct a large-scale monthly dataset for California spanning 2000 to 2024 by integrating PRISM climate variables, MTBS wildfire perimeters, MODIS NDVI, NLCD landcover, and USGS DEM terrain data. The objective is to develop a transparent, reproducible framework for probabilistic wildfire risk estimation suitable for large-scale spatial analysis and decision support.
 
-The current implementation focuses on scalable data engineering, exploratory analysis, and baseline modeling. We developed a Polars-based preprocessing pipeline for memory-efficient merging, type optimization, feature engineering, and transformation across tens of millions of grid–month observations. Exploratory Data Analysis (EDA) identified structured missingness patterns, particularly elevated NDVI missingness in early 2000, which informed our decision to truncate early periods to improve dataset consistency. Baseline classification experiments using Logistic Regression and Support Vector Machines demonstrated high overall accuracy but poor wildfire detection due to extreme class imbalance (~0.4% positive cases). We subsequently implemented a GPU-accelerated XGBoost classifier, which improved ranking performance as measured by ROC AUC (≈0.82 to 0.84 across evaluation splits). Precision–recall performance remains constrained by event rarity, especially on validation data. Feature importance analysis was conducted to assess model behavior and interpretability. 
+## Problem Description
+
+Wildfire prediction in this project is a highly imbalanced classification problem. Only about 0.4% of observations are positive wildfire cases, while the large majority are non-burned grid-month observations. Because of this, standard accuracy can be misleading, since a model may perform well overall while still failing to detect wildfire events.
+
+For this reason, we focus not only on accuracy, but also on precision, recall, F1 score, ROC AUC, and PR AUC. These metrics better reflect model performance under severe class imbalance.
+
+## Current Progress
+
+The current implementation focuses on scalable data engineering, exploratory analysis, and baseline modeling. We developed a Polars-based preprocessing pipeline for memory-efficient merging, type optimization, feature engineering, and transformation across tens of millions of grid-month observations.
+
+Exploratory Data Analysis identified structured missingness patterns, particularly elevated NDVI missingness in early 2000, which informed our decision to truncate early periods to improve dataset consistency.
+
+Baseline classification experiments using Logistic Regression, Random Forest, and Support Vector Machines demonstrated high overall accuracy but poor wildfire detection due to extreme class imbalance. We subsequently implemented a GPU-accelerated XGBoost classifier, which improved ranking performance as measured by ROC AUC, reaching approximately 0.82 to 0.84 across evaluation splits. Precision-recall performance remains constrained by event rarity, especially on validation data. Feature importance analysis was also conducted to assess model behavior and interpretability.
 
 ## Data
 This project integrates multiple public geospatial datasets:
@@ -22,6 +36,47 @@ This project integrates multiple public geospatial datasets:
 
 ### <u>Spatial Domain dataset</u>
     6) Originally scoped to San Diego County, now expanded to statewide California
+
+## Repository Structure
+
+| Path | Description |
+|---|---|
+| `ca_data_processing/` | Scripts for building the statewide California dataset |
+| `ca_data_processing/combine_dataset.py` | Merges processed layers into the final modeling dataset |
+| `ca_data_processing/download_ca_state.py` | Downloads California boundary and spatial domain data |
+| `ca_data_processing/download_nlcd_annual.py` | Downloads NLCD annual landcover data |
+| `ca_data_processing/download_prism_data.py` | Downloads PRISM climate data |
+| `ca_data_processing/process_dem_data.py` | Processes DEM terrain data and derives elevation features |
+| `ca_data_processing/process_mbts_data.py` | Processes MTBS wildfire perimeter data into burn labels |
+| `ca_data_processing/process_ndvi_data.py` | Processes MODIS NDVI vegetation data |
+| `sd_data_processing/` | Original San Diego County preprocessing workflow from the earlier project scope |
+| `sd_data_processing/combine_dataset.py` | Combines San Diego County processed datasets |
+| `sd_data_processing/download_nlcd_annual.py` | Downloads NLCD data for San Diego County |
+| `sd_data_processing/download_prism_data.py` | Downloads PRISM climate data for San Diego County |
+| `sd_data_processing/download_sd_county.py` | Downloads San Diego spatial domain files |
+| `sd_data_processing/process_dem_data.py` | Processes DEM terrain layers |
+| `sd_data_processing/process_mtbs_data.py` | Processes wildfire perimeter data |
+| `sd_data_processing/process_ndvi_data.py` | Processes NDVI vegetation data |
+| `data/` | Stores generated datasets used for downstream analysis |
+| `data/combined_data.parquet` | Combined statewide dataset used for modeling |
+| `ca_baseline.ipynb` | Baseline model experiments for California data |
+| `ca_dataprep.ipynb` | Data preparation and feature engineering notebook |
+| `ca_eda.ipynb` | Exploratory Data Analysis for the California dataset |
+| `ca_xgboost.ipynb` | XGBoost modeling and evaluation notebook |
+| `eda.ipynb` | Earlier exploratory analysis notebook |
+| `model.ipynb` | Initial modeling experiments |
+| `environment.yml` | Conda environment definition with package versions |
+| `pyproject.toml` | Project dependency and package configuration |
+| `.python-version` | Python version specification |
+| `.gitignore` | Files and directories excluded from Git tracking |
+| `README.md` | Project documentation and reproducibility instructions |
+
+The repository is organized to separate preprocessing pipelines, notebooks, generated data, and environment configuration.
+
+- `ca_data_processing/` contains the main statewide California preprocessing workflow used in the current version of the project.
+- `sd_data_processing/` contains the earlier San Diego County workflow from the original project scope.
+- The `ca_*.ipynb` notebooks contain California-specific data preparation, exploratory analysis, baseline modeling, and XGBoost experiments.
+- `environment.yml` and `pyproject.toml` provide the information needed to recreate the project environment.
 
 ## Workflow
 1. Data Preprocessing
@@ -108,8 +163,9 @@ python process_mtbs_data.py
 python combine_dataset.py        
 ```
 
-## Software dependencies
+## Environment Setup & Software Dependencies
 
+This project uses `environment.yml` and `pyproject.toml` for environment and dependency management.
 
 Recommended steps (Conda, preferred for geospatial stacks):
 
@@ -125,7 +181,8 @@ If you don't use conda, create and activate a virtualenv and install dependencie
 
 Commonly required packages (non-exhaustive): `numpy`, `pandas`, `xarray`, `rasterio`, `geopandas`, `shapely`, `rioxarray`, `scipy`, `scikit-learn`, `matplotlib`, `pyproj`, `jupyterlab`, `notebook`, `polars`, `xgboost`, and other geospatial utilities. 
 
-GPU acceleration is optional; some modeling experiments use GPU-enabled XGBoost when available.
+GPU acceleration is optional; some modeling experiments use GPU-enabled XGBoost when available.  
+Dependency versions are pinned in `environment.yml` and `pyproject.toml`.
 
 ## Reproduce results (commands)
 
