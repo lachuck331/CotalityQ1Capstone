@@ -37,6 +37,7 @@ This project integrates multiple public geospatial datasets:
 ### <u>Spatial Domain dataset</u>
     6) Originally scoped to San Diego County, now expanded to statewide California
 
+
 ## Repository Structure
 
 | Path | Description |
