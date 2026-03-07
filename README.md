@@ -163,8 +163,9 @@ python process_mtbs_data.py
 python combine_dataset.py        
 ```
 
-## Software dependencies
+## Environment Setup & Software Dependencies
 
+This project uses `environment.yml` and `pyproject.toml` for environment and dependency management.
 
 Recommended steps (Conda, preferred for geospatial stacks):
 
@@ -180,7 +181,8 @@ If you don't use conda, create and activate a virtualenv and install dependencie
 
 Commonly required packages (non-exhaustive): `numpy`, `pandas`, `xarray`, `rasterio`, `geopandas`, `shapely`, `rioxarray`, `scipy`, `scikit-learn`, `matplotlib`, `pyproj`, `jupyterlab`, `notebook`, `polars`, `xgboost`, and other geospatial utilities. 
 
-GPU acceleration is optional; some modeling experiments use GPU-enabled XGBoost when available.
+GPU acceleration is optional; some modeling experiments use GPU-enabled XGBoost when available.  
+Dependency versions are pinned in `environment.yml` and `pyproject.toml`.
 
 ## Reproduce results (commands)
 
