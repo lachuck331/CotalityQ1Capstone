@@ -45,6 +45,7 @@ This project integrates multiple public geospatial datasets:
 | **Quarter 1** | Originally scoped to San Diego County |
 | **Quarter 2** | Expanded to statewide California |
 
+
 ## Repository Structure
 
 The repository is organized into distinct phases of the data science lifecycle, with each phase subdivided into quarters (`quarter_1` for San Diego, `quarter_2` for California).
