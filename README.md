@@ -238,6 +238,29 @@ jupyter lab
 jupyter nbconvert --to notebook --execute ca_xgboost.ipynb --output executed_ca_xgboost.ipynb
 ```
 
+## Unit Testing & Pipeline Automation
 
+The project includes a `pytest` suite to validate the integrity of the data processing scripts and intermediate directory handling. We use a `Makefile` to streamline testing and full pipeline execution.
 
+### Running Tests
+To run the automated unit tests covering both the Quarter 1 and Quarter 2 data generation functions, run:
+```bash
+make test
+```
 
+### Executing Full Pipelines via Make
+Instead of running discrete processing scripts manually, you can execute the workflows entirely via the Makefile:
+
+**Quarter 1 (San Diego) Pipeline Integration**
+- Download data: `make download_q1`
+- Process data: `make process_q1`
+- Run the full Q1 end-to-end pipeline: `make all_q1`
+
+**Quarter 2 (California) Pipeline Integration**
+- Download data: `make download_q2`
+- Process data: `make process_q2`
+- Run the full Q2 end-to-end pipeline: `make all_q2`
+
+**Utility Commands**
+- Install dependencies: `make install`
+- Clean up caches: `make clean`
