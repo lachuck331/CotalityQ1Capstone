@@ -23,19 +23,27 @@ Baseline classification experiments using Logistic Regression, Random Forest, an
 
 ## Data
 This project integrates multiple public geospatial datasets:
-### <u>Predictor/Feature Datasets </u>
-    1) PRISM climate at 800m spatial resolution (Jan1999-Dec2024)
-        Variables: Precipitation, maximum temperature, maximum VPD, mean dewpoint temperature
-    2) USGS 1 Arc Second DEM files
-    3) MODIS/Terra Vegetation Indices Monthly L3 Global 1km SIN Grid V061 for the period (Feb2000-Dec2024)
-    4) Annual NLCD landcover for the period 1999-2024
 
-### <u>Target Dataset</u>
-    5) MTBS Fire Perimeter dataset
-        Historical wildfire footprints used to construct burned/non-burned labels
+### Predictor & Feature Datasets
+| Dataset | Details |
+|---|---|
+| **PRISM Climate** | 800m spatial resolution (Jan 1999 - Dec 2024) |
+| &nbsp;&nbsp;&nbsp;&nbsp; ↳ Variables | Precipitation, maximum temperature, maximum VPD, mean dewpoint temperature |
+| **USGS DEM** | 1 Arc Second DEM files for terrain |
+| **MODIS/Terra NDVI** | Vegetation Indices Monthly L3 Global 1km SIN Grid V061 (Feb 2000 - Dec 2024) |
+| **NLCD Landcover** | Annual landcover classification (1999 - 2024) |
 
-### <u>Spatial Domain dataset</u>
-    6) Originally scoped to San Diego County, now expanded to statewide California
+### Target Dataset
+| Dataset | Details |
+|---|---|
+| **MTBS Fire Perimeters** | Historical wildfire footprints |
+| &nbsp;&nbsp;&nbsp;&nbsp; ↳ Usage | Used to construct burned (1) / non-burned (0) labels |
+
+### Spatial Domain
+| Domain | Scope |
+|---|---|
+| **Quarter 1** | Originally scoped to San Diego County |
+| **Quarter 2** | Expanded to statewide California |
 
 
 ## Repository Structure
