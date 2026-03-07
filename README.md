@@ -1,6 +1,7 @@
 
 # California Wildfire Frequency Prediction
 
+Authors: _Stuti Verma_, _Gahn Wuwong_, _Diego Arevalo Fernandez_, _Lacha Barton-Gluzman_
 Mentors: _Ilyes Meftah_, _Aaron Bagnell_
 
 ## Project Overview
