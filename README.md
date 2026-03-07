@@ -1,11 +1,24 @@
 
-
+# California Wildfire Frequency Prediction
 
 Mentors: _Ilyes Meftah_, _Aaron Bagnell_
 
+## Project Overview
 Traditional wildfire burn probability assessment often relies on computationally expensive physical fire spread simulations, static fuel representations, and limited historical ignition modeling. This project explores a complementary statistical learning approach that estimates historical wildfire burn probabilities using widely available geospatial, climatic, vegetation, and topographic data. We construct a large-scale monthly dataset for California spanning 2000 to 2024 by integrating PRISM climate variables, MTBS wildfire perimeters, MODIS NDVI, NLCD landcover, and USGS DEM terrain data. The objective is to develop a transparent, reproducible framework for probabilistic wildfire risk estimation suitable for large-scale spatial analysis and decision support.
 
-The current implementation focuses on scalable data engineering, exploratory analysis, and baseline modeling. We developed a Polars-based preprocessing pipeline for memory-efficient merging, type optimization, feature engineering, and transformation across tens of millions of grid–month observations. Exploratory Data Analysis (EDA) identified structured missingness patterns, particularly elevated NDVI missingness in early 2000, which informed our decision to truncate early periods to improve dataset consistency. Baseline classification experiments using Logistic Regression and Support Vector Machines demonstrated high overall accuracy but poor wildfire detection due to extreme class imbalance (~0.4% positive cases). We subsequently implemented a GPU-accelerated XGBoost classifier, which improved ranking performance as measured by ROC AUC (≈0.82 to 0.84 across evaluation splits). Precision–recall performance remains constrained by event rarity, especially on validation data. Feature importance analysis was conducted to assess model behavior and interpretability. 
+## Problem Description
+
+Wildfire prediction in this project is a highly imbalanced classification problem. Only about 0.4% of observations are positive wildfire cases, while the large majority are non-burned grid-month observations. Because of this, standard accuracy can be misleading, since a model may perform well overall while still failing to detect wildfire events.
+
+For this reason, we focus not only on accuracy, but also on precision, recall, F1 score, ROC AUC, and PR AUC. These metrics better reflect model performance under severe class imbalance.
+
+## Current Progress
+
+The current implementation focuses on scalable data engineering, exploratory analysis, and baseline modeling. We developed a Polars-based preprocessing pipeline for memory-efficient merging, type optimization, feature engineering, and transformation across tens of millions of grid-month observations.
+
+Exploratory Data Analysis identified structured missingness patterns, particularly elevated NDVI missingness in early 2000, which informed our decision to truncate early periods to improve dataset consistency.
+
+Baseline classification experiments using Logistic Regression, Random Forest, and Support Vector Machines demonstrated high overall accuracy but poor wildfire detection due to extreme class imbalance. We subsequently implemented a GPU-accelerated XGBoost classifier, which improved ranking performance as measured by ROC AUC, reaching approximately 0.82 to 0.84 across evaluation splits. Precision-recall performance remains constrained by event rarity, especially on validation data. Feature importance analysis was also conducted to assess model behavior and interpretability.
 
 ## Data
 This project integrates multiple public geospatial datasets:
