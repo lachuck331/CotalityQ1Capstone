@@ -86,8 +86,7 @@ The repository is organized into distinct phases of the data science lifecycle, 
 | &nbsp;&nbsp;&nbsp;&nbsp; ↳ `quarter_2/` | CA datasets (e.g., `ca_combined_data.parquet`) |
 | &nbsp;&nbsp;&nbsp;&nbsp; ↳ `quarter_1/` | SD datasets (e.g., `combined_data_sd.parquet`) |
 | `results/` | Output models, metrics, and figures |
-| &nbsp;&nbsp;&nbsp;&nbsp; ↳ `quarter_2/` | Specific outputs for the California domain |
-| &nbsp;&nbsp;&nbsp;&nbsp; ↳ `quarter_1/` | Specific outputs for the San Diego domain |
+| &nbsp;&nbsp;&nbsp;&nbsp; ↳ `aggregated_metrics.md`| Master file aggregating performance across modeling notebooks |
 
 ### Configuration
 | Path | Description |
@@ -157,15 +156,25 @@ The repository is organized into distinct phases of the data science lifecycle, 
 
 If you prefer a different location, create the directory and adjust the scripts or environment variables inside scripts to point to your path.
 
-## Accessing the data 
+## Accessing the Data & Results
 
-The processed California dataset is not stored directly in this repository due to file size constraints. The statewide parquet file exceeds GitHub storage limits and must be generated locally using the provided preprocessing pipeline. Users can recreate the dataset by running the download and processing scripts described below. All intermediate steps are fully reproducible using public data sources.
+Due to GitHub size limits, the final generated California `ca_combined_data.parquet` and our model predictions are too large to host within this repository. 
+
+🔗 **Instead, our predictions and trained model weights can be accessed directly on Hugging Face:**
+👉 **[Tuned XGBoost Model Weights & Predictions](https://huggingface.co/datasets/gwuwong/cotality-capstone)** 👈
+
+Furthermore, to easily track modeling performance across notebooks (ROC-AUC, PR-AUC, Accuracy), we've extracted and summarized all terminal outputs into one master file. You can analyze the results comparisons without opening the notebooks by viewing the [Aggregated Metrics Summary](results/aggregated_metrics.md).
+
+For users who want to explicitly recreate the datasets and experimentsfrom scratch, you can generate everything locally using the provided preprocessing pipeline in the section below. All intermediate steps are reproducible using public data sources.
 
 
 ## Loading the Data From Scratch
 
-
+To load the data from scratch, run the following commands:
 ```bash
+cd data_processing/quarter_2
+
+# 1. Download source datasets
 python download_ca_state.py     
 python download_prism_data.py    
 python download_nlcd_annual.py   
@@ -177,9 +186,10 @@ Note: Some datasets are hosted by third parties and may require a stable network
 After downloads, run the processing scripts to create uniform, analysis-ready layers on the target grid:
 
 ```bash
+# 2. Process features and combine into final dataset
 python process_dem_data.py       
 python process_ndvi_data.py      
-python process_mtbs_data.py      
+python process_mbts_data.py      
 python combine_dataset.py        
 ```
 
@@ -213,16 +223,18 @@ Note: Building the full statewide California parquet can take significant disk s
 2) Download and prepare the data (run scripts in order):
 
 ```bash
+cd data_processing/quarter_2
 
+# 1. Download
 python download_ca_state.py
 python download_prism_data.py
 python download_nlcd_annual.py
 python download_mtbs_data.py   
 
-
+# 2. Process & Combine
 python process_dem_data.py
 python process_ndvi_data.py
-python process_mtbs_data.py
+python process_mbts_data.py
 python combine_dataset.py
 ```
 
@@ -235,6 +247,7 @@ jupyter lab
 
 
 ```bash
+cd modeling/quarter_2
 jupyter nbconvert --to notebook --execute ca_xgboost.ipynb --output executed_ca_xgboost.ipynb
 ```
 
