@@ -153,7 +153,7 @@ window.initDemo = function () {
         if (value === undefined || value === null) return [0, 0, 0, 0];
 
         if (colName === 'burned_area' || colName === 'y_pred') {
-            return value > 0.5 ? [255, 30, 30, 200] : [30, 160, 30, 200]; // Red = 1, Subdued Green = 0
+            return value > 0.5 ? [170, 0, 0, 235] : [0, 0, 0, 0]; // Red = 1, transparent = 0
         }
 
         const range = RANGES[colName] || { min: 0, max: 1 };
@@ -161,9 +161,16 @@ window.initDemo = function () {
         ratio = Math.max(0, Math.min(1, ratio));
 
         if (colName === 'y_pred_proba') {
-            const r = Math.round(ratio * 255);
-            const g = Math.round((1 - ratio) * 160); // Darker base green instead of 255
-            return [r, g, 0, 200]; // Gradient Subdued Green to Red
+            if (ratio <= 0) return [0, 0, 0, 0];
+            const lightRed = [255, 120, 120];
+            const darkRed = [170, 0, 0];
+            const colorT = Math.pow(ratio, 0.7); // Reach richer reds earlier in the range
+            const alphaT = Math.pow(ratio, 0.4); // Keep mid-range less transparent
+            const r = Math.round(lightRed[0] + (darkRed[0] - lightRed[0]) * colorT);
+            const g = Math.round(lightRed[1] + (darkRed[1] - lightRed[1]) * colorT);
+            const b = Math.round(lightRed[2] + (darkRed[2] - lightRed[2]) * colorT);
+            const a = Math.round(alphaT * 245);
+            return [r, g, b, a]; // Gradient light red to dark red, with 0 transparent
         }
 
         if (colName === 'ppt') {
@@ -414,7 +421,7 @@ window.initDemo = function () {
             } else if (colName === 'elevation') {
                 legendBar.style.backgroundImage = 'linear-gradient(to top, #1e2828, #e6dede)';
             } else if (colName === 'y_pred' || colName === 'burned_area' || colName === 'y_pred_proba') {
-                legendBar.style.backgroundImage = 'linear-gradient(to top, rgb(30, 160, 30), rgb(255, 30, 30))';
+                legendBar.style.backgroundImage = 'linear-gradient(to top, rgba(255, 120, 120, 0), rgba(215, 45, 45, 0.85), rgba(170, 0, 0, 1))';
             } else if (colName === 'landcover') {
                 legendBar.style.backgroundImage = 'linear-gradient(0deg, #000, #333, #777, #aaa, #ccc, #fff)';
             } else {
@@ -756,6 +763,9 @@ window.initDemo = function () {
         updateLegend();
         renderMap();
     });
+
+    // Ensure legend matches default selected layer on initial load.
+    updateLegend();
 
     // --- Add special date markers to the slider ---
     async function loadBurnDates() {

@@ -14,7 +14,7 @@ html::-webkit-scrollbar {
 /* ---------- Fixed Container ---------- */
 .tracing-beam {
   position: fixed;
-  left: 0;
+  left: 16px;
   top: 0;
   bottom: 0;
   width: 220px;
@@ -22,6 +22,13 @@ html::-webkit-scrollbar {
   pointer-events: none;
   display: flex;
   align-items: stretch;
+}
+
+/* Reserve space so page content never overlaps the beam */
+@media (min-width: 769px) {
+  body {
+    padding-left: 220px;
+  }
 }
 
 /* ---------- SVG Path ---------- */

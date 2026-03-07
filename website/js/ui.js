@@ -130,6 +130,7 @@ const UI = {
       }
       btn.innerHTML = this._themeIcons[theme];
       btn.setAttribute("aria-label", `Theme: ${theme}`);
+      window.dispatchEvent(new CustomEvent("themechange", { detail: { theme } }));
     };
 
     applyTheme(current);

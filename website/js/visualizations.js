@@ -678,8 +678,15 @@
     };
 
     const applyAxes = (state, ms = 0) => {
-      const gridColor = cssVar("--stroke2", "rgba(0,0,0,.08)");
-      const axisColor = cssVar("--text-secondary", "#666");
+      const explicitTheme = document.documentElement.getAttribute("data-theme");
+      const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+      const isDarkTheme = explicitTheme === "dark" || (!explicitTheme && prefersDark);
+      const gridColor = isDarkTheme
+        ? "rgba(255,255,255,.22)"
+        : "rgba(0,0,0,.30)";
+      const axisColor = isDarkTheme
+        ? "rgba(255,255,255,.80)"
+        : "rgba(0,0,0,.72)";
       if (ms > 0) {
         const xTransition = xAxisG.transition().duration(ms).ease(d3.easeCubicInOut);
         const yTransition = yAxisG.transition().duration(ms).ease(d3.easeCubicInOut);
@@ -794,7 +801,10 @@
         .attr("opacity", hideNew ? 0 : 1)
         .text((d) => d.value.toFixed(4));
 
-      const labelsMerge = labelsEnter.merge(labels).text((d) => d.value.toFixed(4));
+      const labelsMerge = labelsEnter
+        .merge(labels)
+        .attr("fill", valueColor)
+        .text((d) => d.value.toFixed(4));
       const labelSel = ms > 0 ? labelsMerge.transition().duration(ms).ease(d3.easeCubicInOut) : labelsMerge;
       if (ms > 0 && stagger > 0) labelSel.delay((d, i) => i * stagger);
       labelSel
@@ -865,6 +875,35 @@
       renderImmediate();
     }, 180);
     window.addEventListener("resize", rerender, { passive: true });
+
+    const rerenderForTheme = debounce(() => {
+      if (isToggleAnimating) return;
+      renderImmediate();
+    }, 60);
+
+    if ("MutationObserver" in window) {
+      const htmlThemeObserver = new MutationObserver((mutations) => {
+        for (const m of mutations) {
+          if (m.type === "attributes" && m.attributeName === "data-theme") {
+            rerenderForTheme();
+            break;
+          }
+        }
+      });
+      htmlThemeObserver.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ["data-theme"]
+      });
+    }
+
+    const systemThemeMq = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
+    if (systemThemeMq) {
+      systemThemeMq.addEventListener("change", () => {
+        const selectedTheme = localStorage.getItem("theme") || "system";
+        if (selectedTheme === "system") rerenderForTheme();
+      });
+    }
+    window.addEventListener("themechange", rerenderForTheme);
 
     toggleBtn.addEventListener("click", async () => {
       if (isToggleAnimating || !fullData.length) return;
