@@ -1,4 +1,7 @@
 (function () {
+  const FEATURE_IMPORTANCE_READY_FLAG = "__cotalityFeatureImportanceReady";
+  const FEATURE_IMPORTANCE_READY_EVENT = "cotality:feature-importance-ready";
+
   function cssVar(name, fallback) {
     const v = getComputedStyle(document.documentElement).getPropertyValue(name);
     return (v && v.trim()) || fallback;
@@ -576,7 +579,11 @@
   function initFeatureImportanceViz() {
     const container = document.getElementById("featureImportanceViz");
     const toggleBtn = document.getElementById("importanceToggle");
-    if (!container || !toggleBtn || !window.d3) return;
+    if (!container || !toggleBtn || !window.d3) {
+      globalThis[FEATURE_IMPORTANCE_READY_FLAG] = true;
+      window.dispatchEvent(new CustomEvent(FEATURE_IMPORTANCE_READY_EVENT));
+      return;
+    }
 
     const wrapper = container.closest(".vizCard") || container.parentElement;
     const tooltip = ensureTooltip(wrapper);
@@ -584,6 +591,7 @@
     let showAll = false;
     let observed = false;
     let isToggleAnimating = false;
+    let hasEmittedReady = false;
     let svg = null;
     let xAxisG = null;
     let yAxisG = null;
@@ -964,6 +972,7 @@
           applyAxes(initialState, 0);
           updateMarks(initialState, { ms: 0, hideNew: true, removeExiting: true });
           updateMarks(initialState, { ms: 720, hideNew: false, removeExiting: false, stagger: 20 });
+          emitFeatureImportanceReady();
         };
 
         setupObserver(container, start);
@@ -972,9 +981,16 @@
       .catch((err) => {
         console.warn(err);
         container.innerHTML = "<p class='vizError'>Unable to load feature importance data.</p>";
+        emitFeatureImportanceReady();
       });
   }
 
   window.initPipelineViz = initPipelineViz;
   window.initFeatureImportanceViz = initFeatureImportanceViz;
 })();
+    const emitFeatureImportanceReady = () => {
+      if (hasEmittedReady) return;
+      hasEmittedReady = true;
+      globalThis[FEATURE_IMPORTANCE_READY_FLAG] = true;
+      window.dispatchEvent(new CustomEvent(FEATURE_IMPORTANCE_READY_EVENT));
+    };

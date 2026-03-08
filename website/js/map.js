@@ -77,6 +77,32 @@ function getMonthName(monthIndex) {
     return names[monthIndex - 1];
 }
 
+function getMonthKey(year, month) {
+    return `${year}-${String(month).padStart(2, '0')}`;
+}
+
+const STAR_AUTOPLAY_INTERVAL_MS = 2500;
+const MONTH_CACHE_GLOBAL_KEY = '__cotalityDemoMonthCache';
+const MONTH_INFLIGHT_GLOBAL_KEY = '__cotalityDemoMonthInflight';
+let parquetDepsPromise = null;
+
+function ensureGlobalMap(key) {
+    if (!(globalThis[key] instanceof Map)) {
+        globalThis[key] = new Map();
+    }
+    return globalThis[key];
+}
+
+async function getParquetDeps() {
+    if (!parquetDepsPromise) {
+        parquetDepsPromise = Promise.all([
+            import('https://cdn.jsdelivr.net/npm/@loaders.gl/core@4.1.4/+esm'),
+            import('https://cdn.jsdelivr.net/npm/@loaders.gl/parquet@4.1.4/+esm')
+        ]).then(([core, parquet]) => ({ parse: core.parse, ParquetLoader: parquet.ParquetLoader }));
+    }
+    return parquetDepsPromise;
+}
+
 // Global scope initDemo replacement hooked from script.js
 window.initDemo = function () {
     const container = document.getElementById('demoHeatContainer');
@@ -99,6 +125,7 @@ window.initDemo = function () {
     const timeMonthSelect = document.getElementById('timeMonth');
     const timeYearSelect = document.getElementById('timeYear');
     const dateGroupEl = document.getElementById('dateGroup');
+    const timePlayToggle = document.getElementById('timePlayToggle');
 
     // Populate Year Dropdown dynamically
     for (let y = 2000; y <= 2024; y++) {
@@ -116,37 +143,187 @@ window.initDemo = function () {
     const scaleMin = document.getElementById("scaleMin");
     const legendBar = document.getElementById("legendBar");
 
+    const monthDataCache = ensureGlobalMap(MONTH_CACHE_GLOBAL_KEY);
+    const monthDataInflight = ensureGlobalMap(MONTH_INFLIGHT_GLOBAL_KEY);
+    let mapLoadingCount = 0;
+    let starIndices = [];
+    let starKeySet = new Set();
+    let autoplayTimer = null;
+    let autoplayCursor = 0;
+    let isAutoplaying = false;
+
+    function beginMapLoading() {
+        mapLoadingCount += 1;
+        mapLoading.style.display = 'block';
+    }
+
+    function endMapLoading() {
+        mapLoadingCount = Math.max(0, mapLoadingCount - 1);
+        if (mapLoadingCount === 0) {
+            mapLoading.style.display = 'none';
+        }
+    }
+
+    function updatePlayButton() {
+        if (!timePlayToggle) return;
+        const hasStars = starIndices.length > 0;
+        timePlayToggle.disabled = !hasStars;
+        if (!hasStars) {
+            timePlayToggle.textContent = '▶';
+            timePlayToggle.classList.remove('is-playing');
+            timePlayToggle.setAttribute('aria-label', 'Play starred months');
+            timePlayToggle.title = 'No starred months available';
+            return;
+        }
+        if (isAutoplaying) {
+            timePlayToggle.textContent = '||';
+            timePlayToggle.classList.add('is-playing');
+            timePlayToggle.setAttribute('aria-label', 'Pause starred months');
+            timePlayToggle.title = 'Pause starred months';
+        } else {
+            timePlayToggle.textContent = '▶';
+            timePlayToggle.classList.remove('is-playing');
+            timePlayToggle.setAttribute('aria-label', 'Play starred months');
+            timePlayToggle.title = 'Play starred months';
+        }
+    }
+
+    function stopAutoplay({ resetCursor = false } = {}) {
+        if (autoplayTimer) {
+            clearTimeout(autoplayTimer);
+            autoplayTimer = null;
+        }
+        isAutoplaying = false;
+        if (resetCursor) autoplayCursor = 0;
+        updatePlayButton();
+    }
+
+    function syncDateSelectorsFromIndex(idx, { animate = true } = {}) {
+        const { year, month } = getYearMonthFromIndex(idx);
+        let changed = false;
+        if (parseInt(timeYearSelect.value, 10) !== year) {
+            timeYearSelect.value = year;
+            changed = true;
+        }
+        if (parseInt(timeMonthSelect.value, 10) !== month) {
+            timeMonthSelect.value = month;
+            changed = true;
+        }
+        if (changed && animate) popDateGroup();
+    }
+
+    function setTimeFromIndex(idx, { animate = true } = {}) {
+        slider.value = idx;
+        syncDateSelectorsFromIndex(idx, { animate });
+    }
+
+    function animateSliderToIndex(targetIdx, { duration = 300, pop = true } = {}) {
+        const target = Math.max(parseInt(slider.min, 10) || 0, Math.min(parseInt(slider.max, 10) || 297, targetIdx));
+        const startValue = parseInt(slider.value, 10) || 0;
+        syncDateSelectorsFromIndex(target, { animate: false });
+
+        if (pop) popDateGroup();
+        if (startValue === target || duration <= 0) {
+            slider.value = target;
+            return Promise.resolve();
+        }
+
+        return new Promise(resolve => {
+            let startTime = null;
+            function step(timestamp) {
+                if (!startTime) startTime = timestamp;
+                const progress = Math.min((timestamp - startTime) / duration, 1);
+                const ease = 1 - Math.pow(1 - progress, 3);
+                slider.value = Math.round(startValue + (target - startValue) * ease);
+
+                if (progress < 1) {
+                    requestAnimationFrame(step);
+                } else {
+                    slider.value = target;
+                    resolve();
+                }
+            }
+            requestAnimationFrame(step);
+        });
+    }
+
+    async function loadMonthData(year, month, { showLoading = false } = {}) {
+        const key = getMonthKey(year, month);
+        const cached = monthDataCache.get(key);
+        if (cached) return cached.data;
+
+        if (monthDataInflight.has(key)) {
+            return monthDataInflight.get(key);
+        }
+
+        const loadPromise = (async () => {
+            if (showLoading) beginMapLoading();
+            try {
+                const url = `https://huggingface.co/datasets/gwuwong/cotality-capstone/resolve/main/${year}_${month.toString().padStart(2, '0')}.parquet`;
+                const resp = await fetch(url);
+                if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+                const buffer = await resp.arrayBuffer();
+                const { parse, ParquetLoader } = await getParquetDeps();
+                const tbl = await parse(buffer, ParquetLoader, { worker: false });
+                monthDataCache.set(key, {
+                    year,
+                    month,
+                    data: tbl,
+                    cachedAt: new Date().toISOString()
+                });
+                return tbl;
+            } finally {
+                if (showLoading) endMapLoading();
+                monthDataInflight.delete(key);
+            }
+        })();
+
+        monthDataInflight.set(key, loadPromise);
+        return loadPromise;
+    }
+
     async function fetchData(sliderIndex) {
         const { year, month } = getYearMonthFromIndex(sliderIndex);
 
-        mapLoading.style.display = 'block';
-
         try {
-            // Fetch directly from Hugging Face Datasets (which natively supports high-speed CORS requests)
-            const url = `https://huggingface.co/datasets/gwuwong/cotality-capstone/resolve/main/${year}_${month.toString().padStart(2, '0')}.parquet`;
-
-            const resp = await fetch(url);
-            if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-
-            const buffer = await resp.arrayBuffer();
-
-            // Build-free ESM Browser Imports (Auto-polyfills Node `fs` via jsdelivr)
-            const { parse, load } = await import('https://cdn.jsdelivr.net/npm/@loaders.gl/core@4.1.4/+esm');
-            const { ParquetLoader } = await import('https://cdn.jsdelivr.net/npm/@loaders.gl/parquet@4.1.4/+esm');
-
-            // Parse the data directly on the main thread to avoid Cross-Origin WebWorker crashes
-            const tbl = await parse(buffer, ParquetLoader, {
-                worker: false
+            const tbl = await loadMonthData(year, month, {
+                showLoading: true
             });
-
             currentData = tbl;
             updateLandcoverFilters(tbl);
             renderMap();
         } catch (e) {
             console.error("Map Data Error Full Trace:", e);
-        } finally {
-            mapLoading.style.display = 'none';
         }
+    }
+
+    async function runAutoplayStep() {
+        if (!isAutoplaying) return;
+        if (!starIndices.length) {
+            stopAutoplay({ resetCursor: true });
+            return;
+        }
+        if (autoplayCursor >= starIndices.length) {
+            stopAutoplay({ resetCursor: true });
+            return;
+        }
+
+        const idx = starIndices[autoplayCursor];
+        autoplayCursor += 1;
+        await animateSliderToIndex(idx, { duration: 300, pop: true });
+        if (!isAutoplaying) return;
+        await fetchData(idx);
+
+        if (!isAutoplaying) return;
+        if (autoplayCursor >= starIndices.length) {
+            stopAutoplay({ resetCursor: true });
+            return;
+        }
+
+        autoplayTimer = setTimeout(() => {
+            autoplayTimer = null;
+            runAutoplayStep();
+        }, STAR_AUTOPLAY_INTERVAL_MS);
     }
 
     function getColor(value, colName) {
@@ -668,29 +845,20 @@ window.initDemo = function () {
     // Connect slider (update label immediately during drag)
     slider.addEventListener("input", () => {
         const idx = parseInt(slider.value, 10) || 0;
-        const { year, month } = getYearMonthFromIndex(idx);
-
-        let changed = false;
-        if (parseInt(timeYearSelect.value, 10) !== year) {
-            timeYearSelect.value = year;
-            changed = true;
-        }
-        if (parseInt(timeMonthSelect.value, 10) !== month) {
-            timeMonthSelect.value = month;
-            changed = true;
-        }
-
-        if (changed) popDateGroup();
+        stopAutoplay({ resetCursor: true });
+        syncDateSelectorsFromIndex(idx, { animate: true });
     });
 
     // Fetch data only after drag is released to save network calls
     slider.addEventListener("change", () => {
         const idx = parseInt(slider.value, 10) || 0;
+        stopAutoplay({ resetCursor: true });
         fetchData(idx);
     });
 
     // Handle Month/Year Dropdown Interactions 
     function handleSelectChange() {
+        stopAutoplay({ resetCursor: true });
         const y = parseInt(timeYearSelect.value, 10);
         const m = parseInt(timeMonthSelect.value, 10);
 
@@ -701,28 +869,7 @@ window.initDemo = function () {
         const max = parseInt(slider.max, 10);
         targetIdx = Math.max(0, Math.min(max, targetIdx));
 
-        const startValue = parseInt(slider.value, 10);
-        const duration = 300; // ms
-        let startTime = null;
-
-        // Custom animation function to slide the native browser range thumb 
-        function step(timestamp) {
-            if (!startTime) startTime = timestamp;
-            const progress = Math.min((timestamp - startTime) / duration, 1);
-            // EaseOut cubic profile
-            const ease = 1 - Math.pow(1 - progress, 3);
-            slider.value = Math.round(startValue + (targetIdx - startValue) * ease);
-
-            if (progress < 1) {
-                requestAnimationFrame(step);
-            } else {
-                slider.value = targetIdx;
-                fetchData(targetIdx);
-            }
-        }
-
-        requestAnimationFrame(step);
-        popDateGroup();
+        animateSliderToIndex(targetIdx, { duration: 300, pop: true }).then(() => fetchData(targetIdx));
     }
 
     timeMonthSelect.addEventListener("change", handleSelectChange);
@@ -758,6 +905,22 @@ window.initDemo = function () {
         tooltip.style.opacity = '0';
     });
 
+    if (timePlayToggle) {
+        timePlayToggle.addEventListener('click', () => {
+            if (isAutoplaying) {
+                stopAutoplay({ resetCursor: false });
+                return;
+            }
+            if (!starIndices.length) return;
+            if (autoplayCursor < 0 || autoplayCursor >= starIndices.length) {
+                autoplayCursor = 0;
+            }
+            isAutoplaying = true;
+            updatePlayButton();
+            runAutoplayStep();
+        });
+    }
+
     // Connect dropdown
     layerSelect.addEventListener("change", () => {
         updateLegend();
@@ -766,69 +929,68 @@ window.initDemo = function () {
 
     // Ensure legend matches default selected layer on initial load.
     updateLegend();
+    updatePlayButton();
 
     // --- Add special date markers to the slider ---
     async function loadBurnDates() {
         try {
             const resp = await fetch('./data/ca_burn_dates.json');
-            if (!resp.ok) return;
+            if (!resp.ok) throw new Error(`Failed to load burn dates JSON: HTTP ${resp.status}`);
             const dates = await resp.json();
             const wrapper = document.querySelector('.demo-slider-wrapper');
-
-            // Sort dates chronologically to guarantee we can find the earliest easily
-            dates.sort((a, b) => (a.year - b.year) || (a.month - b.month));
 
             const min = parseInt(slider.min, 10) || 0;
             const max = parseInt(slider.max, 10) || 297;
             const range = max - min;
-
-            let earliestValidIdx = null;
+            const deduped = new Map();
 
             dates.forEach(d => {
                 const idx = (d.year - 2000) * 12 + (d.month - 1) - 2;
-                if (idx >= min && idx <= max) {
-                    if (earliestValidIdx === null) earliestValidIdx = idx; // Grab first sorted valid date
-
-                    if (wrapper) {
-                        const pct = (idx - min) / range;
-                        // Match native range thumb offset behavior (10px approx width)
-                        const thumbOffset = (pct - 0.5) * 10;
-                        const mark = document.createElement('div');
-                        mark.className = 'demo-slider-mark';
-                        mark.style.left = `calc(${pct * 100}% - ${thumbOffset}px)`;
-                        mark.dataset.date = `${getMonthName(d.month).substring(0, 3)} '${String(d.year).slice(-2)}`;
-
-                        mark.addEventListener('click', () => {
-                            timeYearSelect.value = d.year;
-                            timeMonthSelect.value = d.month;
-                            handleSelectChange();
-                        });
-
-                        wrapper.appendChild(mark);
-                    }
+                if (idx < min || idx > max) return;
+                const key = getMonthKey(d.year, d.month);
+                if (!deduped.has(key)) {
+                    deduped.set(key, {
+                        year: d.year,
+                        month: d.month,
+                        idx
+                    });
                 }
             });
 
-            // Initialize map view to the FIRST (minimum) important burn date
-            let initialIdx = earliestValidIdx !== null ? earliestValidIdx : (parseInt(slider.value, 10) || 0);
-            const initialYM = getYearMonthFromIndex(initialIdx);
+            const sortedStars = Array.from(deduped.values()).sort((a, b) => a.idx - b.idx);
+            starIndices = sortedStars.map(d => d.idx);
+            starKeySet = new Set(sortedStars.map(d => getMonthKey(d.year, d.month)));
+            updatePlayButton();
 
-            slider.value = initialIdx;
-            timeYearSelect.value = initialYM.year;
-            timeMonthSelect.value = initialYM.month;
+            if (wrapper) {
+                sortedStars.forEach(d => {
+                    const pct = (d.idx - min) / range;
+                    const thumbOffset = (pct - 0.5) * 10;
+                    const mark = document.createElement('div');
+                    mark.className = 'demo-slider-mark';
+                    mark.style.left = `calc(${pct * 100}% - ${thumbOffset}px)`;
+                    mark.dataset.date = `${getMonthName(d.month).substring(0, 3)} '${String(d.year).slice(-2)}`;
 
-            // Dispatch input event to update the native slider tooltip position visually
-            slider.dispatchEvent(new Event('input'));
+                    mark.addEventListener('click', () => {
+                        stopAutoplay({ resetCursor: true });
+                        timeYearSelect.value = d.year;
+                        timeMonthSelect.value = d.month;
+                        handleSelectChange();
+                    });
 
-            fetchData(initialIdx);
+                    wrapper.appendChild(mark);
+                });
+            }
+
+            const initialIdx = starIndices.length > 0 ? starIndices[0] : (parseInt(slider.value, 10) || 0);
+            setTimeFromIndex(initialIdx, { animate: false });
+            await fetchData(initialIdx);
 
         } catch (e) {
             console.error("Failed to load burn dates:", e);
             // Fallback load if dates fail
             const initialIdx = parseInt(slider.value, 10) || 0;
-            const fallbackYM = getYearMonthFromIndex(initialIdx);
-            timeYearSelect.value = fallbackYM.year;
-            timeMonthSelect.value = fallbackYM.month;
+            setTimeFromIndex(initialIdx, { animate: false });
             fetchData(initialIdx);
         }
     }
