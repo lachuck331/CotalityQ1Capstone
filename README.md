@@ -252,6 +252,11 @@ cd modeling/quarter_2
 jupyter nbconvert --to notebook --execute ca_xgboost.ipynb --output executed_ca_xgboost.ipynb
 ```
 
+**Expected outputs**
+- an executed notebook saved as `executed_ca_xgboost.ipynb`
+- evaluation metrics including precision, recall, F1 score, ROC AUC, and PR AUC
+- confusion matrix outputs and additional diagnostic plots generated inside the notebook
+
 ## Unit Testing & Pipeline Automation
 
 The project includes a `pytest` suite to validate the integrity of the data processing scripts and intermediate directory handling. We use a `Makefile` to streamline testing and full pipeline execution.
