@@ -117,6 +117,12 @@
       const width = Math.max(320, container.clientWidth || 900);
       const isMobile = width < 700;
       const height = isMobile ? 1280 : 1026;
+      const explicitTheme = document.documentElement.getAttribute("data-theme");
+      const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+      const isDarkTheme = explicitTheme === "dark" || (!explicitTheme && prefersDark);
+      const linkColor = isDarkTheme
+        ? "rgba(255,255,255,.56)"
+        : "rgba(0,0,0,.62)";
       container.style.minHeight = `${height}px`;
 
       container.innerHTML = "";
@@ -148,7 +154,7 @@
         .attr("orient", "auto")
         .append("path")
         .attr("d", "M0,-5L10,0L0,5")
-        .attr("fill", cssVar("--accent", "rgba(0,0,0,.55)"));
+        .attr("fill", linkColor);
 
       svg.append("rect")
         .attr("x", 10)
@@ -206,9 +212,15 @@
         const optunaW = 152;
         const resultW = Math.max(154, Math.round(width * 0.12));
 
-        const srcX = Math.round(width * 0.05);
-        const procX = Math.round(width * 0.30);
-        const combineX = Math.round(width * 0.56);
+        const stageShiftX = Math.round(width * 0.03);
+        const trainShiftX = Math.round(width * 0.05);
+        const missX = Math.round(width * 0.10) + stageShiftX;
+        const transformsX = Math.round(width * 0.36) + stageShiftX;
+        const splitX = Math.round(width * 0.62) + stageShiftX;
+        const alignToStageColumn = (stageX, nodeW) => stageX + Math.round((stageW - nodeW) / 2);
+        const srcX = alignToStageColumn(missX, sourceW);
+        const procX = alignToStageColumn(transformsX, processW);
+        const combineX = alignToStageColumn(splitX, combineW);
         const srcYs = [88, 162, 236, 310, 384];
 
         const sources = [
@@ -243,7 +255,7 @@
           id: "missingness",
           label: "Missingness",
           detail: "Null diagnostics are completed before modeling; January 2000 NDVI rows are removed as by-design missingness, and all-null rows are filtered out.",
-          x: Math.round(width * 0.10),
+          x: missX,
           y: middleY,
           w: stageW,
           h: nodeH,
@@ -253,7 +265,7 @@
           id: "transforms",
           label: "Transformations",
           detail: "Feature engineering adds lagged burned_area, log transforms for ppt, vpdmax, and slope, landcover one-hot encoding, and z-score scaling for selected columns.",
-          x: Math.round(width * 0.36),
+          x: transformsX,
           y: middleY,
           w: stageW,
           h: nodeH,
@@ -263,7 +275,7 @@
           id: "split",
           label: "Train/Test/Validation",
           detail: "Validation years are fixed to 2005-2009, and the remaining samples are shuffled and split 70/30 into train and test sets using seed 42.",
-          x: Math.round(width * 0.62),
+          x: splitX,
           y: middleY,
           w: stageW,
           h: nodeH,
@@ -274,7 +286,7 @@
           id: "logreg",
           label: "Logistic Regression",
           detail: "The Logistic Regression baseline uses cuML LogisticRegression(max_iter=500, class_weight='balanced') and achieves test ROC-AUC 0.8703 with PR-AUC 0.0063.",
-          x: Math.round(width * 0.08),
+          x: Math.round(width * 0.08) + trainShiftX,
           y: 694,
           w: baselineW,
           h: nodeH,
@@ -284,7 +296,7 @@
           id: "rf",
           label: "Random Forest",
           detail: "Random Forest was excluded from the final California baseline run due to large computational requirements.",
-          x: Math.round(width * 0.08),
+          x: Math.round(width * 0.08) + trainShiftX,
           y: 786,
           w: baselineW,
           h: nodeH,
@@ -294,7 +306,7 @@
           id: "svm",
           label: "Linear SVM",
           detail: "The Linear SVM baseline uses cuML LinearSVC(max_iter=1000) with decision-function scoring and achieves test ROC-AUC 0.8112 with PR-AUC 0.0020.",
-          x: Math.round(width * 0.08),
+          x: Math.round(width * 0.08) + trainShiftX,
           y: 878,
           w: baselineW,
           h: nodeH,
@@ -304,7 +316,7 @@
           id: "xgb_base",
           label: "Base XGBoost",
           detail: "Before tuning, the base CUDA XGBClassifier achieves test ROC-AUC 0.8621 and PR-AUC 0.2272, while the 2005-2009 temporal holdout reaches ROC-AUC 0.8512 and PR-AUC 0.0088.",
-          x: Math.round(width * 0.28),
+          x: Math.round(width * 0.28) + trainShiftX,
           y: 786,
           w: xgbW + 8,
           h: nodeH,
@@ -314,7 +326,7 @@
           id: "optuna",
           label: "Optuna XGBoost",
           detail: "An Optuna study with 10 trials maximizes PR-AUC, and the best hyperparameters are used to train final_xgb_clf on the training split.",
-          x: Math.round(width * 0.50),
+          x: Math.round(width * 0.50) + trainShiftX,
           y: 786,
           w: optunaW,
           h: nodeH,
@@ -389,7 +401,7 @@
         links.push({ source: miss, target: transforms, points: [right(miss), left(transforms)] });
         links.push({ source: transforms, target: split, points: [right(transforms), left(split)] });
 
-        const baselineJunction = [Math.round(width * 0.03), 786 + nodeH / 2];
+        const baselineJunction = [Math.round(width * 0.03) + trainShiftX, 786 + nodeH / 2];
         const wrapY2 = 650;
         const underRfY = rf.y + rf.h + 18;
 
@@ -441,7 +453,6 @@
         });
       }
 
-      const linkColor = cssVar("--accent", "rgba(0,0,0,.45)");
       const nodeFill = cssVar("--surface", "#fff");
       const nodeStroke = cssVar("--accent", "#333");
       const textColor = cssVar("--text", "#111");
@@ -572,7 +583,40 @@
     };
 
     const rerender = debounce(render, 180);
+    const rerenderForTheme = debounce(render, 120);
+
     window.addEventListener("resize", rerender, { passive: true });
+
+    if (!container.dataset.pipelineThemeBound) {
+      const themeObserver = new MutationObserver((mutations) => {
+        mutations.forEach((m) => {
+          if (m.type === "attributes" && m.attributeName === "data-theme") {
+            rerenderForTheme();
+          }
+        });
+      });
+      themeObserver.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ["data-theme"]
+      });
+
+      const systemThemeMq = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
+      if (systemThemeMq) {
+        const onSystemThemeChange = () => {
+          const selectedTheme = localStorage.getItem("theme") || "system";
+          if (selectedTheme === "system") rerenderForTheme();
+        };
+        if (typeof systemThemeMq.addEventListener === "function") {
+          systemThemeMq.addEventListener("change", onSystemThemeChange);
+        } else if (typeof systemThemeMq.addListener === "function") {
+          systemThemeMq.addListener(onSystemThemeChange);
+        }
+      }
+
+      window.addEventListener("themechange", rerenderForTheme);
+      container.dataset.pipelineThemeBound = "true";
+    }
+
     setupObserver(container, render);
   }
 

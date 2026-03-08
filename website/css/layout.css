@@ -593,19 +593,14 @@
   transition:
     filter 0.25s ease,
     transform 0.2s ease;
+  transform-box: fill-box;
+  transform-origin: center;
 }
 
 .pipeline-node:hover rect {
+  transform: translateY(-2px);
   filter: drop-shadow(0 0 8px var(--accent-glow))
     drop-shadow(0 2px 6px rgba(0, 0, 0, 0.1));
-}
-
-.pipeline-node {
-  transition: transform 0.22s ease;
-}
-
-.pipeline-node:hover {
-  transform: translateY(-2px);
 }
 
 /* ---------- Feature importance bar hover ---------- */

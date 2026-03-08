@@ -24,10 +24,9 @@ html::-webkit-scrollbar {
   align-items: stretch;
 }
 
-/* Reserve space so page content never overlaps the beam */
 @media (min-width: 769px) {
   body {
-    padding-left: 220px;
+    padding-left: 5rem;
   }
 }
 
