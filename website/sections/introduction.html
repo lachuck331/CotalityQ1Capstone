@@ -2,16 +2,19 @@
   <div class="section__head reveal">
     <h2>Introduction</h2>
     <p>
-      California wildfire risk assessment is difficult to operationalize at scale: most locations do not burn in a
-      given month, positive fire events are extremely rare, and environmental conditions shift over time. Traditional
-      simulation-heavy approaches can be expensive to run repeatedly across a statewide domain, while narrow local
-      models may not transfer well to broader geography.
+      California wildfire risk assessment is difficult to operationalize at scale. Rising temperatures, prolonged
+      drought, and shifting fuel conditions increase ignition and spread risk across diverse climatic and ecological
+      regions, yet most locations still do not burn in a given month. Traditional physical fire simulations can model
+      spread in detail, but they also demand substantial computing resources, detailed fuel maps, and static
+      assumptions about ignitions and fuels that become harder to maintain as climate, vegetation, and development
+      patterns change.
     </p>
     <p>
-      This project builds a reproducible statewide burn-probability pipeline on a harmonized 800m monthly grid with
-      public climate, vegetation, terrain, landcover, and fire-perimeter data. The goal is decision support through
-      calibrated risk ranking, with explicit temporal holdout evaluation to test real-world transfer under severe
-      class imbalance.
+      This project builds a reproducible statewide burn-probability pipeline on a harmonized 800m monthly grid using
+      public climate, vegetation, terrain, landcover, and fire-perimeter data. In partnership with Cotality, the goal
+      is not only accurate rare-event prediction, but interpretable and reproducible risk estimates that can support
+      insurance and mortgage applications, public safety planning, and broader resilience analysis through calibrated
+      risk ranking and explicit temporal holdout evaluation.
     </p>
   </div>
 
@@ -21,7 +24,7 @@
         <div class="ico" aria-hidden="true">🎯</div>
         <h3>Project Goals</h3>
       </div>
-      <p>Build a transparent statewide workflow that estimates monthly burn probability, prioritizes ranking quality for rare events, and provides interpretable signals for decision support.</p>
+      <p>Build a transparent statewide workflow that estimates monthly burn probability across California, scales beyond county-level case studies, and translates environmental signals into usable risk rankings. Because the application is high-stakes, the emphasis is on calibrated outputs that are interpretable, reproducible, and practical for decision support rather than prediction accuracy alone.</p>
     </article>
 
     <article class="card reveal" style="--r-delay:.12s">
@@ -29,7 +32,7 @@
         <div class="ico" aria-hidden="true">⚙️</div>
         <h3>Prior Work</h3>
       </div>
-      <p>Compared with prior local-baseline efforts and non-temporal evaluations, this phase scales to statewide California, standardizes preprocessing across public geospatial sources, and adds tuned XGBoost with strict 2005–2009 temporal holdout testing.</p>
+      <p>Recent work shows that wildfire activity can be predicted from publicly available climate, vegetation, and historical burn data without relying on simulation-heavy spread models. Statistical and gradient-boosted tree methods have performed well on rare, highly imbalanced fire events by learning nonlinear relationships among temperature, precipitation, water deficit, fuels, and ignition conditions while reducing false alarms in fuel-limited areas. This project extends that data-driven framework to statewide California burn-probability mapping at 800m resolution.</p>
     </article>
 
     <article class="card reveal" style="--r-delay:.19s">
@@ -37,7 +40,7 @@
         <div class="ico" aria-hidden="true">🧱</div>
         <h3>Core Challenge</h3>
       </div>
-      <p>The target is a rare-event label with extreme class imbalance, so high accuracy can be misleading. Robust evaluation requires ROC-AUC/PR-AUC and temporal holdout testing, not accuracy alone.</p>
+      <p>The target is a rare-event label with extreme class imbalance, so high accuracy can be misleading and standard classifiers can default to predicting no fire almost everywhere. The problem is further complicated by changing climate, vegetation, and ignition conditions that weaken static historical assumptions over time. Robust evaluation therefore requires ROC-AUC, PR-AUC, threshold tuning, and temporal holdout testing, not accuracy alone.</p>
     </article>
 
     <article class="card reveal" style="--r-delay:.26s">
@@ -45,7 +48,7 @@
         <div class="ico" aria-hidden="true">🗺️</div>
         <h3>Statewide Scope</h3>
       </div>
-      <p>California domain at monthly resolution on a harmonized 800m grid; source coverage is 2000–2024, with model-ready records beginning in March 2000 after startup-missingness handling and lag alignment.</p>
+      <p>The statewide domain spans California's deserts, shrublands, forests, and developed wildland-urban interface regions on a harmonized 800m monthly grid. Source coverage is 2000–2024, with model-ready records beginning in March 2000 after startup-missingness handling and lag alignment. This broader footprint tests whether a unified pipeline can generalize beyond local models while remaining computationally practical at scale.</p>
     </article>
   </div>
 </div>
