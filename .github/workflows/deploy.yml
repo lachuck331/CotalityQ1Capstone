@@ -1,9 +1,9 @@
-name: Deploy GitHub Pages (from /website on website branch)
+name: Deploy GitHub Pages (from /website on main branch)
 
 on:
   push:
     branches:
-      - website
+      - main
   workflow_dispatch:
 
 permissions:
