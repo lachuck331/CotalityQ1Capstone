@@ -232,11 +232,11 @@
         ].map((n, i) => ({ ...n, x: srcX, y: srcYs[i], w: sourceW, h: nodeH, kind: "source" }));
 
         const preprocess = [
-          { id: "prism_pre", label: "Subset + Monthly Align", detail: "Climate columns are validated, typed, and aligned to the monthly statewide table used for modeling." },
-          { id: "ndvi_pre", label: "Reproject + Resample", detail: "NDVI layers are reprojected, resampled, and aligned to the monthly modeling timeline after missingness review." },
-          { id: "nlcd_pre", label: "Class Mapping", detail: "NLCD classes are mapped into named model categories and expanded into 20 one-hot encoded features." },
-          { id: "dem_pre", label: "Terrain Derivation", detail: "DEM-based terrain fields are prepared and retained as continuous predictors alongside climate and vegetation variables." },
-          { id: "mtbs_pre", label: "Fire Filter + Rasterize", detail: "MTBS perimeters are filtered and rasterized into burned_area targets, then temporally sorted for lag creation." },
+          { id: "prism_pre", label: "Subset + Monthly Align", detail: "For each month from January 2000 through December 2024, the script downloads PRISM climate files, extracts the NetCDF, clips it to the California polygon, saves one state-level file per variable, and verifies spatial overlap before deleting intermediate archives." },
+          { id: "ndvi_pre", label: "Reproject + Resample", detail: "Each MODIS NDVI raster is clipped to California, reprojected to exactly match the PRISM CRS, shape, and bounds with nearest-neighbor resampling, and written as `ca_ndvi_800m_YYYY-MM-DD.nc` so it can be joined back by month." },
+          { id: "nlcd_pre", label: "Class Mapping", detail: "NLCD annual rasters are clipped first by California bounding box and then by the true state polygon, converted to EPSG:4326, stripped of classes 11, 12, and 250, and upscaled to the PRISM grid with mode resampling so each 800m cell retains its dominant landcover class." },
+          { id: "dem_pre", label: "Terrain Derivation", detail: "DEM preprocessing computes elevation plus gradient-based slope and aspect on each clipped source tile, aggregates those fine-grid values into PRISM-sized bins, averages overlapping contributions across tiles, and writes a single `usgs_dem_800m.nc` layer aligned with the statewide climate grid." },
+          { id: "mtbs_pre", label: "Fire Filter + Rasterize", detail: "MTBS perimeters are reprojected if needed, clipped to California, filtered to wildfire records whose ignition year is 2000-2024, and rasterized separately for every month onto the PRISM transform so each output file contains a binary burned-area surface for that month." },
         ].map((n, i) => ({ ...n, x: procX, y: srcYs[i], w: processW, h: nodeH, kind: "pre" }));
 
         const combine = {

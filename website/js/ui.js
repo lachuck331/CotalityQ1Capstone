@@ -27,9 +27,13 @@ const UI = {
     const handleScroll = function (e) {
       const id = this.getAttribute("href");
       if (!id || id.length < 2) return;
+      e.preventDefault();
+      if (id === "#top" || id === "#home") {
+        window.scrollTo({ top: 0, behavior: UI.reduce ? "auto" : "smooth" });
+        return;
+      }
       const target = document.querySelector(id);
       if (!target) return;
-      e.preventDefault();
       target.scrollIntoView({ behavior: UI.reduce ? "auto" : "smooth", block: "start" });
     };
     document.querySelectorAll('a[href^="#"]').forEach(a => {

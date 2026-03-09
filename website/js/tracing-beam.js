@@ -143,6 +143,10 @@ const TracingBeam = (() => {
       dot.style.top = `${(dotPositions[i].y / vh) * 100}%`;
 
       dot.addEventListener("click", () => {
+        if (sec.id === "top" || sec.id === "home") {
+          window.scrollTo({ top: 0, behavior: "smooth" });
+          return;
+        }
         const target = document.getElementById(sec.id);
         if (target) {
           target.scrollIntoView({ behavior: "smooth", block: "start" });
