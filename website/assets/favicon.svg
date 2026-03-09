@@ -1,11 +1,32 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="none">
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" fill="none">
   <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#B7FFF0"/>
-      <stop offset=".55" stop-color="#8AA7FF"/>
-      <stop offset="1" stop-color="#FF6BD6"/>
+    <linearGradient id="bg" x1="12" y1="8" x2="52" y2="58" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#231916"/>
+      <stop offset="1" stop-color="#120E0D"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse"
+      gradientTransform="translate(32 34) rotate(90) scale(24 20)">
+      <stop stop-color="#FF8C42" stop-opacity=".38"/>
+      <stop offset="1" stop-color="#FF8C42" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="flame" x1="24" y1="16" x2="42" y2="46" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFB347"/>
+      <stop offset=".55" stop-color="#FF8C42"/>
+      <stop offset="1" stop-color="#D94F2B"/>
     </linearGradient>
   </defs>
-  <rect x="10" y="10" width="44" height="44" rx="14" fill="url(#g)"/>
-  <path d="M22 40c8-2 10-8 12-18 2 2 6 8 8 12-3 8-11 14-20 14z" fill="rgba(0,0,0,.28)"/>
+
+  <rect x="6" y="6" width="52" height="52" rx="16" fill="url(#bg)"/>
+  <rect x="6.75" y="6.75" width="50.5" height="50.5" rx="15.25" stroke="rgba(255,255,255,.08)"/>
+  <circle cx="32" cy="34" r="22" fill="url(#glow)"/>
+
+  <path
+    d="M33.915 15.5c1.069 4.337-.706 7.51-3.254 10.548-2.165 2.582-4.419 4.964-4.419 8.63 0 2.881 2.012 5.247 4.86 5.247 3.784 0 6.597-3.176 6.597-7.258 0-1.861-.648-3.707-1.913-5.456 4.675 2.289 7.972 7.177 7.972 12.304 0 7.043-5.127 11.985-12.304 11.985-7.02 0-11.812-4.715-11.812-11.218 0-6.103 3.413-9.77 6.735-13.146 2.623-2.666 5.103-5.185 7.538-11.636Z"
+    fill="url(#flame)"/>
+  <path
+    d="M31.634 28.985c1.886 2.088 2.986 4.254 2.986 6.571 0 3.381-2.231 5.959-5.302 5.959-2.407 0-4.131-1.859-4.131-4.181 0-2.478 1.549-4.109 3.135-5.805 1.174-1.255 2.387-2.553 3.312-4.544Z"
+    fill="#FFF3D7"/>
+
+  <circle cx="44.5" cy="18.5" r="2.5" fill="#FFB347"/>
+  <circle cx="44.5" cy="18.5" r="4.5" fill="#FFB347" fill-opacity=".18"/>
 </svg>

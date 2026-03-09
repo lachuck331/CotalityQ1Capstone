@@ -116,19 +116,17 @@
     const render = () => {
       const width = Math.max(320, container.clientWidth || 900);
       const isMobile = width < 700;
-      const height = isMobile ? 1280 : 1026;
+      let height = isMobile ? 960 : 1026;
       const explicitTheme = document.documentElement.getAttribute("data-theme");
       const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
       const isDarkTheme = explicitTheme === "dark" || (!explicitTheme && prefersDark);
       const linkColor = isDarkTheme
         ? "rgba(255,255,255,.56)"
         : "rgba(0,0,0,.62)";
-      container.style.minHeight = `${height}px`;
 
       container.innerHTML = "";
       const svg = d3.select(container)
         .append("svg")
-        .attr("viewBox", `0 0 ${width} ${height}`)
         .attr("role", "img")
         .attr("aria-label", "Animated wildfire modeling pipeline graph");
 
@@ -156,11 +154,10 @@
         .attr("d", "M0,-5L10,0L0,5")
         .attr("fill", linkColor);
 
-      svg.append("rect")
+      const bgRect = svg.append("rect")
         .attr("x", 10)
         .attr("y", 10)
         .attr("width", width - 20)
-        .attr("height", height - 20)
         .attr("rx", 14)
         .attr("fill", "url(#pipelineDots)")
         .attr("stroke", cssVar("--stroke", "rgba(0,0,0,.08)"))
@@ -171,10 +168,10 @@
 
       if (isMobile) {
         const cx = width / 2;
-        const laneW = Math.min(330, width - 58);
-        const nodeH = 60;
+        const laneW = Math.min(340, width - 56);
+        const nodeH = 62;
         const y0 = 64;
-        const rowGap = 72;
+        const rowGap = 96;
 
         const stack = [
           { id: "src", label: "Data Sources", detail: "The modeling workflow combines monthly PRISM climate, NASA MODIS NDVI, USGS NLCD landcover, USGS DEM terrain, and MTBS fire-perimeter labels into ca_combined_data.parquet for statewide California." },
@@ -200,7 +197,18 @@
           });
         });
 
-        for (let i = 0; i < nodes.length - 1; i++) links.push({ source: nodes[i], target: nodes[i + 1] });
+        const bottom = (n) => [n.x + n.w / 2, n.y + n.h];
+        const top = (n) => [n.x + n.w / 2, n.y];
+        for (let i = 0; i < nodes.length - 1; i++) {
+          links.push({
+            source: nodes[i],
+            target: nodes[i + 1],
+            points: [bottom(nodes[i]), top(nodes[i + 1])],
+          });
+        }
+
+        const lastNode = nodes[nodes.length - 1];
+        height = Math.max(920, Math.ceil(lastNode.y + lastNode.h + 68));
       } else {
         const nodeH = 60;
         const sourceW = 152;
@@ -453,6 +461,10 @@
         });
       }
 
+      container.style.minHeight = `${height}px`;
+      svg.attr("viewBox", `0 0 ${width} ${height}`);
+      bgRect.attr("height", height - 20);
+
       const nodeFill = cssVar("--surface", "#fff");
       const nodeStroke = cssVar("--accent", "#333");
       const textColor = cssVar("--text", "#111");
@@ -641,6 +653,13 @@
     let yAxisG = null;
     let barGroup = null;
     let labelGroup = null;
+
+    const emitFeatureImportanceReady = () => {
+      if (hasEmittedReady) return;
+      hasEmittedReady = true;
+      globalThis[FEATURE_IMPORTANCE_READY_FLAG] = true;
+      window.dispatchEvent(new CustomEvent(FEATURE_IMPORTANCE_READY_EVENT));
+    };
 
     container.style.overflow = "hidden";
 
@@ -1032,9 +1051,3 @@
   window.initPipelineViz = initPipelineViz;
   window.initFeatureImportanceViz = initFeatureImportanceViz;
 })();
-    const emitFeatureImportanceReady = () => {
-      if (hasEmittedReady) return;
-      hasEmittedReady = true;
-      globalThis[FEATURE_IMPORTANCE_READY_FLAG] = true;
-      window.dispatchEvent(new CustomEvent(FEATURE_IMPORTANCE_READY_EVENT));
-    };
