@@ -174,16 +174,16 @@
         const rowGap = 96;
 
         const stack = [
-          { id: "src", label: "Data Sources", detail: "The modeling workflow combines monthly PRISM climate, NASA MODIS NDVI, USGS NLCD landcover, USGS DEM terrain, and MTBS fire-perimeter labels into ca_combined_data.parquet for statewide California." },
-          { id: "src_proc", label: "Per-source Preprocess", detail: "In data preparation, column types are optimized (UInt8, UInt16, and Float32), nulls are audited, and rows that are entirely null are removed." },
-          { id: "combine", label: "Combine", detail: "The statewide table is sorted by latitude, longitude, year, and month, and then converted into model-ready feature and target parquet files." },
-          { id: "miss", label: "Missingness", detail: "EDA identifies January 2000 NDVI values as by-design missingness, so that month is removed and remaining missingness is handled during downstream filtering and feature construction." },
-          { id: "transform", label: "Transformations", detail: "Feature engineering adds a one-step burned_area lag by location, applies log transforms to ppt, vpdmax, and slope (with epsilon), one-hot encodes 20 landcover classes, and scales selected numeric columns." },
-          { id: "split", label: "Train/Test/Validation", detail: "The temporal holdout set is defined as 2005-2009, and all remaining years are shuffled and split 70/30 into train and test sets with seed 42." },
-          { id: "base", label: "Baseline Models", detail: "Baseline comparisons use cuML LogisticRegression(max_iter=500, class_weight='balanced') and cuML LinearSVC(max_iter=1000); Random Forest was excluded from the final California baseline run due to large computational requirements." },
-          { id: "xgb_base", label: "Base XGBoost", detail: "The untuned CUDA XGBoost baseline achieves test ROC-AUC 0.8621 and PR-AUC 0.2272, and on the 2005-2009 temporal holdout it achieves ROC-AUC 0.8512 and PR-AUC 0.0088." },
-          { id: "optuna", label: "Optuna XGBoost", detail: "Optuna runs 10 trials to maximize PR-AUC, tuning booster, learning_rate, max_depth, min_child_weight, gamma, regularization, and sampling parameters." },
-          { id: "result", label: "Results", detail: "The final tuned XGBoost model reaches test ROC-AUC 0.9448 and PR-AUC 0.5548, while the 2005-2009 temporal holdout reaches ROC-AUC 0.8425 and PR-AUC 0.0113; baseline PR-AUC values remain substantially lower." },
+          { id: "src", label: "Data Sources", detail: "The workflow combines public PRISM climate data, NASA MODIS NDVI, NLCD land cover, USGS terrain data, and MTBS wildfire perimeters for statewide California." },
+          { id: "src_proc", label: "Grid Alignment", detail: "Each source is clipped or regridded to a common California footprint and PRISM-based reference grid before merging." },
+          { id: "combine", label: "Dataset Assembly", detail: "The aligned layers are merged into one monthly table indexed by location and time." },
+          { id: "miss", label: "Quality Checks", detail: "Rows outside the shared data footprint are filtered out, and January 2000 is removed because NDVI coverage begins in February 2000." },
+          { id: "transform", label: "Feature Engineering", detail: "The model table adds lagged fire history, transformed climate and terrain variables, encoded land cover, and standardized numeric inputs for the linear baselines." },
+          { id: "split", label: "Temporal Split", detail: "Years 2005-2009 are held out for temporal validation, and the remaining years are divided into training and test sets." },
+          { id: "base", label: "Baseline Models", detail: "Linear and tree-based baselines provide reference points for the statewide modeling task." },
+          { id: "xgb_base", label: "XGBoost", detail: "XGBoost is used as the main nonlinear model for capturing interactions across climate, vegetation, terrain, and time." },
+          { id: "optuna", label: "XGBoost Tuning", detail: "An Optuna search is used to refine the XGBoost configuration." },
+          { id: "result", label: "Results", detail: "Results are summarized with ROC-AUC and PR-AUC on both the random split and the temporal holdout, with PR-AUC emphasized because wildfire occurrence is a rare-event problem. Accuracy, confusion matrices, and classification reports provide additional context." },
         ];
 
         stack.forEach((n, i) => {
@@ -232,25 +232,25 @@
         const srcYs = [88, 162, 236, 310, 384];
 
         const sources = [
-          { id: "prism", label: "PRISM", detail: "PRISM monthly climate rasters from the PRISM Climate Group (Oregon State University) provide ppt, tdmean, tmax, and vpdmax predictors, with ppt later log-transformed." },
-          { id: "ndvi", label: "MODIS NDVI", detail: "MODIS/Terra Vegetation Indices Monthly L3 (NASA, V061) provide NDVI vegetation signals; EDA confirms January 2000 missingness is expected due to satellite startup timing." },
-          { id: "nlcd", label: "NLCD", detail: "Annual NLCD landcover classes from the USGS-led MRLC program are incorporated as categorical predictors and expanded into one-hot indicator columns during preparation." },
-          { id: "dem", label: "USGS DEM", detail: "USGS 1 arc-second DEM tiles provide terrain-derived elevation, slope, and aspect predictors, with slope later log-transformed for modeling stability." },
-          { id: "mtbs", label: "MTBS", detail: "The Monitoring Trends in Burn Severity (MTBS) perimeter dataset (USGS/USFS) is rasterized into burned_area labels, and a one-step location-level lag is added for temporal context." },
+          { id: "prism", label: "PRISM", detail: "Public monthly climate layers from the PRISM Climate Group at Oregon State University provide the reference grid and core weather predictors." },
+          { id: "ndvi", label: "MODIS NDVI", detail: "Public MODIS/Terra vegetation index data from NASA provide vegetation greenness signals and begin in February 2000." },
+          { id: "nlcd", label: "NLCD", detail: "Public annual land-cover maps from the National Land Cover Database provide categorical context about dominant surface and fuel types." },
+          { id: "dem", label: "USGS DEM", detail: "Public USGS digital elevation models provide elevation, from which slope and aspect are derived for each grid cell." },
+          { id: "mtbs", label: "MTBS", detail: "Public wildfire perimeter records from the Monitoring Trends in Burn Severity program provide the burned-or-unburned labels for each month." },
         ].map((n, i) => ({ ...n, x: srcX, y: srcYs[i], w: sourceW, h: nodeH, kind: "source" }));
 
         const preprocess = [
-          { id: "prism_pre", label: "Subset + Monthly Align", detail: "For each month from January 2000 through December 2024, the script downloads PRISM climate files, extracts the NetCDF, clips it to the California polygon, saves one state-level file per variable, and verifies spatial overlap before deleting intermediate archives." },
-          { id: "ndvi_pre", label: "Reproject + Resample", detail: "Each MODIS NDVI raster is clipped to California, reprojected to exactly match the PRISM CRS, shape, and bounds with nearest-neighbor resampling, and written as `ca_ndvi_800m_YYYY-MM-DD.nc` so it can be joined back by month." },
-          { id: "nlcd_pre", label: "Class Mapping", detail: "NLCD annual rasters are clipped first by California bounding box and then by the true state polygon, converted to EPSG:4326, stripped of classes 11, 12, and 250, and upscaled to the PRISM grid with mode resampling so each 800m cell retains its dominant landcover class." },
-          { id: "dem_pre", label: "Terrain Derivation", detail: "DEM preprocessing computes elevation plus gradient-based slope and aspect on each clipped source tile, aggregates those fine-grid values into PRISM-sized bins, averages overlapping contributions across tiles, and writes a single `usgs_dem_800m.nc` layer aligned with the statewide climate grid." },
-          { id: "mtbs_pre", label: "Fire Filter + Rasterize", detail: "MTBS perimeters are reprojected if needed, clipped to California, filtered to wildfire records whose ignition year is 2000-2024, and rasterized separately for every month onto the PRISM transform so each output file contains a binary burned-area surface for that month." },
+          { id: "prism_pre", label: "Clip to California", detail: "PRISM monthly climate layers are clipped to California and used as the spatial reference for the rest of the pipeline." },
+          { id: "ndvi_pre", label: "Regrid to Match", detail: "MODIS NDVI is regridded to the PRISM reference so vegetation values line up with the climate cells." },
+          { id: "nlcd_pre", label: "Upscale Land Cover", detail: "Annual land-cover maps are upscaled to the common grid and repeated across months within each year." },
+          { id: "dem_pre", label: "Derive Terrain", detail: "Elevation, slope, and aspect are derived from the DEM and aggregated to the same analysis grid." },
+          { id: "mtbs_pre", label: "Monthly Labels", detail: "California wildfire perimeters are filtered by year and rasterized by ignition month to create monthly labels." },
         ].map((n, i) => ({ ...n, x: procX, y: srcYs[i], w: processW, h: nodeH, kind: "pre" }));
 
         const combine = {
           id: "combine",
-          label: "Combine Features",
-          detail: "The modeling starts from a pre-merged statewide table, standardizes the schema, and writes train, test, and validation parquet artifacts for features and targets.",
+          label: "Dataset Assembly",
+          detail: "The processed layers are merged into one statewide monthly table keyed by location and time.",
           x: combineX,
           y: 236,
           w: combineW,
@@ -261,8 +261,8 @@
         const middleY = 540;
         const miss = {
           id: "missingness",
-          label: "Missingness",
-          detail: "Null diagnostics are completed before modeling; January 2000 NDVI rows are removed as by-design missingness, and all-null rows are filtered out.",
+          label: "Quality Checks",
+          detail: "Rows outside the shared data footprint are removed, and January 2000 is dropped because NDVI coverage begins in February 2000.",
           x: missX,
           y: middleY,
           w: stageW,
@@ -271,8 +271,8 @@
         };
         const transforms = {
           id: "transforms",
-          label: "Transformations",
-          detail: "Feature engineering adds lagged burned_area, log transforms for ppt, vpdmax, and slope, landcover one-hot encoding, and z-score scaling for selected columns.",
+          label: "Feature Engineering",
+          detail: "The model table adds lagged fire history, transformed climate and terrain variables, encoded land cover, and standardized numeric predictors for the linear baselines.",
           x: transformsX,
           y: middleY,
           w: stageW,
@@ -281,8 +281,8 @@
         };
         const split = {
           id: "split",
-          label: "Train/Test/Validation",
-          detail: "Validation years are fixed to 2005-2009, and the remaining samples are shuffled and split 70/30 into train and test sets using seed 42.",
+          label: "Temporal Split",
+          detail: "Years 2005-2009 are reserved for temporal validation, and the remaining years are split into training and test sets.",
           x: splitX,
           y: middleY,
           w: stageW,
@@ -293,7 +293,7 @@
         const logreg = {
           id: "logreg",
           label: "Logistic Regression",
-          detail: "The Logistic Regression baseline uses cuML LogisticRegression(max_iter=500, class_weight='balanced') and achieves test ROC-AUC 0.8703 with PR-AUC 0.0063.",
+          detail: "Logistic regression serves as a simple linear baseline for the statewide classification task.",
           x: Math.round(width * 0.08) + trainShiftX,
           y: 694,
           w: baselineW,
@@ -303,7 +303,7 @@
         const rf = {
           id: "rf",
           label: "Random Forest",
-          detail: "Random Forest was excluded from the final California baseline run due to large computational requirements.",
+          detail: "Random forest was explored as part of the baseline model family.",
           x: Math.round(width * 0.08) + trainShiftX,
           y: 786,
           w: baselineW,
@@ -313,7 +313,7 @@
         const svm = {
           id: "svm",
           label: "Linear SVM",
-          detail: "The Linear SVM baseline uses cuML LinearSVC(max_iter=1000) with decision-function scoring and achieves test ROC-AUC 0.8112 with PR-AUC 0.0020.",
+          detail: "A linear SVM provides a second baseline with a different decision boundary than logistic regression.",
           x: Math.round(width * 0.08) + trainShiftX,
           y: 878,
           w: baselineW,
@@ -322,8 +322,8 @@
         };
         const xgbBase = {
           id: "xgb_base",
-          label: "Base XGBoost",
-          detail: "Before tuning, the base CUDA XGBClassifier achieves test ROC-AUC 0.8621 and PR-AUC 0.2272, while the 2005-2009 temporal holdout reaches ROC-AUC 0.8512 and PR-AUC 0.0088.",
+          label: "XGBoost",
+          detail: "XGBoost is the primary nonlinear model used to capture interactions across climate, vegetation, terrain, and time.",
           x: Math.round(width * 0.28) + trainShiftX,
           y: 786,
           w: xgbW + 8,
@@ -332,8 +332,8 @@
         };
         const optuna = {
           id: "optuna",
-          label: "Optuna XGBoost",
-          detail: "An Optuna study with 10 trials maximizes PR-AUC, and the best hyperparameters are used to train final_xgb_clf on the training split.",
+          label: "XGBoost Tuning",
+          detail: "An Optuna search is used to refine the XGBoost configuration.",
           x: Math.round(width * 0.50) + trainShiftX,
           y: 786,
           w: optunaW,
@@ -343,7 +343,7 @@
         const results = {
           id: "results",
           label: "Results",
-          detail: "The final tuned XGBoost model reaches test ROC-AUC 0.9448 and PR-AUC 0.5548, while the 2005-2009 temporal holdout reaches ROC-AUC 0.8425 and PR-AUC 0.0113; baseline PR-AUC values remain much lower.",
+          detail: "Results are summarized with ROC-AUC and PR-AUC on both the random split and the temporal holdout, with PR-AUC emphasized because wildfire occurrence is a rare-event problem. Accuracy, confusion matrices, and classification reports provide additional context.",
           x: width - resultW - 94,
           y: 786,
           w: resultW,
@@ -439,21 +439,16 @@
         });
 
         links.push({ source: xgbBase, target: optuna, points: [right(xgbBase), left(optuna)] });
-
-        /* baseline models → results: top / left / bottom entries */
-        /* logreg (above) → enters results from top */
         links.push({
           source: logreg,
           target: results,
           points: [right(logreg), [results.x + results.w * 0.2, logreg.y + logreg.h / 2], [results.x + results.w * 0.2, results.y]],
         });
-        /* optuna (same row) → enters results from left */
         links.push({
           source: optuna,
           target: results,
           points: [right(optuna), left(results)],
         });
-        /* svm (below) → enters results from bottom */
         links.push({
           source: svm,
           target: results,
