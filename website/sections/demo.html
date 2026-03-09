@@ -1,0 +1,96 @@
+<div class="demo-container reveal">
+    <!-- Map area with legend + landcover overlay -->
+    <div class="demo-map-area">
+      <div id="demoHeatContainer" class="deck-container"></div>
+      <div id="mapLoading" class="map-loading" style="display: none;">Loading data…</div>
+      <div class="tooltip" id="tooltip" role="status" aria-live="polite" hidden></div>
+
+      <!-- Legend panel overlay -->
+      <div class="demo-legend">
+        <!-- Fixed title with crossfade -->
+        <div class="demo-legend__title">
+          <span class="demo-legend__title-text" data-mode="scale">Scale</span>
+          <span class="demo-legend__title-text is-hidden" data-mode="lc">Landcover</span>
+        </div>
+
+        <!-- Scale content -->
+        <div class="demo-legend__section demo-legend__section--scale">
+          <div class="demo-legend__body">
+            <div id="legendBar" class="demo-legend__bar"
+              style="background:linear-gradient(to top, rgba(255,120,120,0), rgba(215,45,45,0.85), rgba(170,0,0,1))"></div>
+            <div id="scaleLabels" class="demo-legend__labels">
+              <span id="scaleMax">1</span>
+              <span id="scaleMidText">Burn Probability</span>
+              <span id="scaleMin">0</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Landcover content -->
+        <div class="demo-legend__section demo-legend__section--lc is-hidden is-collapsed">
+          <div id="lcToggles" class="demo-lc-list">
+            <!-- Injected by JS -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Compact control bar beneath the map -->
+    <div class="demo-toolbar">
+      <div class="demo-toolbar__group demo-toolbar__group--time" style="position: relative;">
+        <button id="timePlayToggle" class="demo-play-toggle" type="button" aria-label="Play starred months"
+          title="Play starred months">▶</button>
+        <label for="t" class="demo-toolbar__label">Time</label>
+        <div class="demo-slider-wrapper" style="position: relative; flex: 1; display:flex; align-items:center;">
+          <input id="t" type="range" min="0" max="297" value="286" class="demo-slider" style="width: 100%;" />
+          <div id="sliderTooltip" class="demo-slider-tooltip">Loading…</div>
+        </div>
+        <div class="demo-toolbar__date-group" id="dateGroup">
+          <select id="timeMonth" class="demo-date-select" aria-label="Month">
+            <option value="1">January</option>
+            <option value="2">February</option>
+            <option value="3">March</option>
+            <option value="4">April</option>
+            <option value="5">May</option>
+            <option value="6">June</option>
+            <option value="7">July</option>
+            <option value="8">August</option>
+            <option value="9">September</option>
+            <option value="10">October</option>
+            <option value="11">November</option>
+            <option value="12">December</option>
+          </select>
+          <select id="timeYear" class="demo-date-select" aria-label="Year">
+            <!-- Populated by JS -->
+          </select>
+        </div>
+      </div>
+
+      <div class="demo-toolbar__divider"></div>
+
+      <div class="demo-toolbar__group demo-toolbar__group--layer">
+        <label for="layerSelect" class="demo-toolbar__label">Layer</label>
+        <select id="layerSelect" class="demo-toolbar__select">
+          <option value="y_pred_proba">Burn Probability</option>
+          <option value="y_pred">Burn Incident (0/1)</option>
+          <option value="burned_area" selected>Actual Burned Area</option>
+          <option value="landcover">Landcover</option>
+          <option value="ppt">Precipitation</option>
+          <option value="tmax">Max Temperature</option>
+          <option value="vpdmax">Vapor Pressure Deficit</option>
+          <option value="ndvi">NDVI</option>
+          <option value="elevation">Elevation</option>
+        </select>
+      </div>
+    </div>
+
+  </div>
+
+<div class="demo-instructions reveal"
+  style="margin-top: 16px; padding: 12px 16px; border-radius: var(--r2); background: var(--bg2); border: 1px solid var(--stroke2);">
+  <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin: 0;">
+    <strong>Quick controls:</strong>
+    drag the time slider (March 2000–December 2024), jump with <span style="color:#FFC107">★</span> markers, and
+    switch layers to compare model probability, observed burns, and feature surfaces.
+  </p>
+</div>

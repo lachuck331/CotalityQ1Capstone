@@ -1,0 +1,647 @@
+.section__head p {
+  color: var(--text-secondary);
+  line-height: 1.7;
+  font-size: 14px;
+}
+
+/* ---------- Grid ---------- */
+.grid3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.intro-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.intro-grid .card {
+  height: 100%;
+}
+
+/* ---------- Cards (generic) ---------- */
+.card {
+  border-radius: var(--r);
+  border: 1px solid var(--stroke);
+  background: var(--card);
+  padding: 18px;
+  transition: border-color 0.2s ease;
+  position: relative;
+}
+
+.card::before {
+  display: none;
+}
+
+.card:hover {
+  border-color: var(--accent);
+}
+
+.card__top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ico {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--accent-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+
+.card h3 {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.card p {
+  margin: 8px 0 10px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  font-size: 14px;
+}
+
+.card ul {
+  padding-left: 16px;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.card li {
+  margin: 3px 0;
+}
+
+/* ---------- Results ---------- */
+.results {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.bigcard {
+  border-radius: var(--r);
+  border: 1px solid var(--stroke);
+  background: var(--card);
+  padding: 18px;
+}
+
+.bigcard__k {
+  font-size: 11px;
+  color: var(--dim);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 600;
+}
+
+.bigcard__v {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.bigcard__v .counter {
+  font-size: 36px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.bigcard__s {
+  font-size: 12px;
+  color: var(--dim);
+}
+
+.bigcard__bar {
+  height: 8px;
+  border-radius: 99px;
+  background: var(--bg2);
+  margin-top: 12px;
+  overflow: hidden;
+}
+
+.bigcard__fill {
+  height: 100%;
+  width: var(--p);
+  background: var(--accent);
+  border-radius: 99px;
+  opacity: 0.6;
+}
+
+.bigcard__note {
+  margin-top: 8px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  font-size: 13px;
+}
+
+.row2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.smallcard {
+  border-radius: var(--r2);
+  border: 1px solid var(--stroke);
+  background: var(--card);
+  padding: 14px;
+}
+
+.smallcard__k {
+  font-size: 11px;
+  color: var(--dim);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 600;
+}
+
+.smallcard__v {
+  margin-top: 6px;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.smallcard__hint {
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--dim);
+}
+
+.stack {
+  border-radius: var(--r);
+  border: 1px solid var(--stroke);
+  background: var(--card);
+  padding: 14px;
+  display: grid;
+  gap: 8px;
+}
+
+.stack__item {
+  display: flex;
+  gap: 10px;
+  padding: 10px;
+  border-radius: var(--r2);
+  border: 1px solid var(--stroke2);
+  background: var(--bg);
+}
+
+.stack__icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: var(--accent-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.stack__t {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.stack__p {
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.5;
+  margin-top: 2px;
+}
+
+.callout {
+  border-radius: var(--r);
+  border: 1px solid var(--stroke);
+  background: var(--accent-soft);
+  padding: 14px;
+  margin-top: 12px;
+  display: flex;
+  gap: 10px;
+}
+
+.callout__icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--accent-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.callout__t {
+  font-weight: 600;
+}
+
+.callout__p {
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-top: 2px;
+  font-size: 13px;
+}
+
+/* ---------- Timeline ---------- */
+.timeline {
+  border-radius: var(--r);
+  border: 1px solid var(--stroke);
+  background: var(--card);
+  padding: 18px;
+  position: relative;
+  overflow: hidden;
+}
+
+.timeline::before {
+  content: "";
+  position: absolute;
+  left: 27px;
+  top: 18px;
+  bottom: 18px;
+  width: 2px;
+  background: var(--stroke);
+}
+
+.step {
+  position: relative;
+  display: grid;
+  grid-template-columns: 50px 1fr;
+  gap: 10px;
+  padding: 10px 0;
+}
+
+/* ---------- Methodology Timeline ---------- */
+.methodology-timeline {
+  --method-lane-x: 30px;
+  --method-pad-left: 74px;
+  --method-dot-size: 34px;
+  position: relative;
+  display: grid;
+  gap: 14px;
+  padding-left: var(--method-pad-left);
+  isolation: isolate;
+}
+
+.methodology-timeline::before {
+  content: "";
+  position: absolute;
+  left: calc(var(--method-lane-x) - 1px);
+  top: var(--method-line-top, 12px);
+  bottom: var(--method-line-bottom, 12px);
+  width: 2px;
+  border-radius: 99px;
+  background: linear-gradient(to bottom,
+      var(--stroke),
+      color-mix(in srgb, var(--accent) 40%, var(--stroke)));
+  z-index: 1;
+}
+
+.methodology-timeline::after {
+  content: "";
+  position: absolute;
+  left: calc(var(--method-lane-x) - 11px);
+  top: var(--method-line-top, 12px);
+  bottom: var(--method-line-bottom, 12px);
+  width: 22px;
+  pointer-events: none;
+  background: radial-gradient(closest-side,
+      color-mix(in srgb, var(--accent) 62%, #ffffff 38%) 0%,
+      color-mix(in srgb, var(--accent) 28%, transparent) 55%,
+      transparent 100%);
+  background-repeat: no-repeat;
+  background-size: 100% 92px;
+  filter: blur(4px);
+  opacity: 0.65;
+  animation: methodologyRunwayFlow 3.1s linear infinite;
+  z-index: 0;
+}
+
+.methodology-step {
+  position: relative;
+  overflow: visible;
+  z-index: 2;
+}
+
+.methodology-step .card__top {
+  gap: 0;
+}
+
+.methodology-step__dot {
+  position: absolute;
+  left: calc(var(--method-lane-x) - var(--method-pad-left) - (var(--method-dot-size) / 2));
+  top: 50%;
+  transform: translateY(-50%);
+  width: var(--method-dot-size);
+  height: var(--method-dot-size);
+  border-radius: 999px;
+  border: 2px solid var(--accent);
+  background: color-mix(in srgb, var(--bg) 90%, transparent);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--bg) 75%, transparent);
+  z-index: 3;
+}
+
+@keyframes methodologyRunwayFlow {
+  from {
+    background-position: 0 -104px;
+    opacity: 0;
+  }
+
+  12% {
+    opacity: 1;
+  }
+
+  88% {
+    opacity: 1;
+  }
+
+  to {
+    background-position: 0 calc(100% + 104px);
+    opacity: 0;
+  }
+}
+
+/* ---------- D3 / Results Additions ---------- */
+.vizCard {
+  position: relative;
+  border-radius: var(--r);
+  border: 1px solid var(--stroke);
+  background: var(--card);
+  padding: 16px;
+  margin-top: 12px;
+}
+
+.vizCard__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.vizCard__top h3 {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.vizCaption {
+  margin-top: 10px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.d3-stage {
+  width: 100%;
+  min-height: 240px;
+}
+
+#pipelineViz {
+  min-height: 980px;
+}
+
+.d3-stage svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.pipeline-node,
+.pipeline-node * {
+  cursor: default;
+}
+
+.pipeline-node text {
+  user-select: none;
+}
+
+.d3-tooltip {
+  position: absolute;
+  z-index: 20;
+  pointer-events: none;
+  max-width: 260px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--stroke);
+  background: color-mix(in srgb, var(--bg) 90%, transparent);
+  color: var(--text);
+  box-shadow: var(--shadow);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.vizDialog {
+  position: fixed;
+  inset: 0;
+  z-index: 220;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.vizDialog.is-open {
+  pointer-events: auto;
+}
+
+.vizDialog__overlay {
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, #000 38%, transparent);
+  backdrop-filter: blur(2px);
+  opacity: 0;
+  transition: opacity 0.08s linear;
+}
+
+.vizDialog.is-open .vizDialog__overlay {
+  opacity: 1;
+}
+
+.vizDialog__panel {
+  position: relative;
+  width: min(620px, calc(100vw - 32px));
+  background: var(--surface);
+  border: 1px solid var(--stroke);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  padding: 20px 20px 18px;
+  transform: translateY(20px) scale(0.97);
+  opacity: 0;
+  transition:
+    transform 0.36s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.36s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.vizDialog.is-open .vizDialog__panel {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+}
+
+.vizDialog__close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--stroke);
+  border-radius: 8px;
+  background: var(--bg2);
+  color: var(--text);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.1s ease;
+}
+
+.vizDialog__close:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+.vizDialog__close:active {
+  transform: scale(0.92);
+  background: var(--accent);
+}
+
+.vizDialog__title {
+  font-size: 17px;
+  line-height: 1.3;
+  font-weight: 700;
+  margin: 0 36px 10px 0;
+}
+
+.vizDialog__body {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.vizError {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.resultsTable {
+  border-radius: var(--r);
+  border: 1px solid var(--stroke);
+  background: var(--card);
+  padding: 14px;
+}
+
+.resultsTable__head {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--dim);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.resultsTable__grid {
+  display: grid;
+  grid-template-columns: 1.8fr repeat(4, 1fr);
+  gap: 8px;
+  padding: 9px 8px;
+  border-top: 1px solid var(--stroke2);
+  font-size: 13px;
+}
+
+.resultsTable__grid--header {
+  color: var(--text-secondary);
+  font-weight: 600;
+  border-top: 0;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.resultsExplorerHead {
+  margin-top: 18px;
+}
+
+.btn--small {
+  padding: 6px 10px;
+  font-size: 12px;
+}
+
+/* ---------- Pipeline link flowing animation ---------- */
+@keyframes dashFlow {
+  to {
+    stroke-dashoffset: -24;
+  }
+}
+
+.pipeline-link--animated {
+  animation: dashFlow 1.2s linear infinite;
+}
+
+/* ---------- Pipeline node hover ---------- */
+.pipeline-node rect {
+  transition:
+    filter 0.25s ease,
+    transform 0.2s ease;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.pipeline-node:hover rect {
+  transform: translateY(-2px);
+  filter: drop-shadow(0 0 8px var(--accent-glow))
+    drop-shadow(0 2px 6px rgba(0, 0, 0, 0.1));
+}
+
+/* ---------- Feature importance bar hover ---------- */
+.fi-bar {
+  transition:
+    opacity 0.22s ease,
+    filter 0.22s ease;
+}
+
+.fi-bars--hovered .fi-bar {
+  opacity: 0.35;
+  filter: saturate(0.5);
+}
+
+.fi-bars--hovered .fi-bar--active {
+  opacity: 1;
+  filter: saturate(1.2) brightness(1.08);
+}
+
+@media (max-width: 980px) {
+  #pipelineViz {
+    min-height: 1180px;
+  }
+
+  .resultsTable__grid {
+    grid-template-columns: 1.4fr 1fr 1fr;
+  }
+
+  .resultsTable__grid > div:nth-child(4),
+  .resultsTable__grid > div:nth-child(5) {
+    display: none;
+  }
+
+  .vizCard__top {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pipeline-link--animated {
+    animation: none;
+  }
+}

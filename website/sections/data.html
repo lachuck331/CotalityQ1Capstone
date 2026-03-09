@@ -1,0 +1,56 @@
+      <div class="wrap">
+        <div class="section__head reveal">
+          <h2>Data sources</h2>
+          <p>Public datasets were harmonized to a common statewide ~800m monthly grid for 2000–2024 wildfire burn-probability modeling.</p>
+        </div>
+
+        <div class="grid3">
+          <article class="source tilt reveal">
+            <div class="source__top">
+              <div class="source__tag">Climate</div>
+              <div class="source__name">PRISM</div>
+            </div>
+            <div class="source__p">Monthly climate predictors (ppt, tdmean, tmax, vpdmax) for statewide California.</div>
+          </article>
+
+          <article class="source tilt reveal">
+            <div class="source__top">
+              <div class="source__tag">Vegetation</div>
+              <div class="source__name">MODIS NDVI</div>
+            </div>
+            <div class="source__p">Monthly NDVI vegetation signal (Feb 2000 onward; Jan 2000 missing by design).</div>
+          </article>
+
+          <article class="source tilt reveal">
+            <div class="source__top">
+              <div class="source__tag">Land cover</div>
+              <div class="source__name">NLCD</div>
+            </div>
+            <div class="source__p">Annual landcover classes mapped to model categories and one-hot encoded features.</div>
+          </article>
+
+          <article class="source tilt reveal">
+            <div class="source__top">
+              <div class="source__tag">Terrain</div>
+              <div class="source__name">USGS DEM</div>
+            </div>
+            <div class="source__p">Static terrain predictors (elevation, slope, aspect) aligned to the analysis grid.</div>
+          </article>
+
+          <article class="source tilt reveal">
+            <div class="source__top">
+              <div class="source__tag">Fire history</div>
+              <div class="source__name">MTBS</div>
+            </div>
+            <div class="source__p">Fire perimeters rasterized into monthly burned/non-burned labels.</div>
+          </article>
+
+          <article class="source tilt reveal">
+            <div class="source__top">
+              <div class="source__tag">Engineering</div>
+              <div class="source__name">Unified Grid</div>
+            </div>
+            <div class="source__p">Model-ready feature table with lag/log transforms, one-hot encoding, and train/test/temporal-validation splits.</div>
+          </article>
+        </div>
+      </div>

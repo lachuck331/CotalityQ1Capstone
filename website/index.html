@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#262626" />
+  <title>California Burn Probability • Capstone Project</title>
+  <meta name="description"
+    content="Predicting monthly wildfire burn probability across California using public geospatial data — UCSD Capstone Project." />
+
+  <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml" />
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet" />
+
+  <link rel="stylesheet" href="./css/style.css?v=5" />
+
+  <!-- Mapbox GL JS for Base Maps -->
+  <link href="https://api.mapbox.com/mapbox-gl-js/v3.8.0/mapbox-gl.css" rel="stylesheet">
+  <script src="https://api.mapbox.com/mapbox-gl-js/v3.8.0/mapbox-gl.js"></script>
+
+  <!-- Deck.gl (Standalone Script API) -->
+  <script src="https://unpkg.com/deck.gl@9.2.9/dist.min.js"></script>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+
+<body>
+
+  <!-- Page-wide mesh gradient background -->
+  <div class="page-bg" aria-hidden="true">
+    <div class="page-bg__blob page-bg__blob--1"></div>
+    <div class="page-bg__blob page-bg__blob--2"></div>
+    <div class="page-bg__blob page-bg__blob--3"></div>
+  </div>
+
+  <!-- Top Nav Target -->
+  <header id="nav" class="topbar"></header>
+
+  <!-- Hero Target -->
+  <main id="top">
+    <div id="hero"></div>
+
+    <!-- Introduction -->
+    <section id="introduction" class="section"></section>
+
+    <!-- Pipeline -->
+    <section id="pipeline" class="section"></section>
+
+    <!-- Methodology -->
+    <section id="methodology" class="section"></section>
+
+    <!-- Results (includes model explorer) -->
+    <section id="results" class="section section--demo"></section>
+
+    <!-- Limitations & Next Steps -->
+    <section id="limitations" class="section"></section>
+
+    <!-- Backward compatibility anchor -->
+    <div id="demo" hidden aria-hidden="true"></div>
+
+    <!-- Team -->
+    <section id="team" class="section"></section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="wrap footer__inner">
+      <div class="footer__left">
+        <div class="brand brand--small">
+          <span class="brand__text">
+            <span class="brand__title">EmberMetrics | Wildfire Risk Intelligence</span>
+            <span class="brand__sub">Predicting Wildfire Burn Probability in California</span>
+          </span>
+        </div>
+      </div>
+
+      <div class="footer__right">
+        <a class="footer__link" href="#top">Home</a>
+        <a class="footer__link" href="#introduction">Intro</a>
+        <a class="footer__link" href="#pipeline">Pipeline</a>
+        <a class="footer__link" href="#results">Results</a>
+        <a class="footer__link" href="#limitations">Next Steps</a>
+        <a class="footer__link" href="#team">Team</a>
+        <a class="footer__link" href="https://github.com/lachuck331/CotalityQ1Capstone" target="_blank"
+          rel="noreferrer">GitHub</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="./js/ui.js"></script>
+  <script src="./js/team.js"></script>
+  <script src="./js/map.js"></script>
+  <script src="./js/visualizations.js?v=9"></script>
+  <script src="./js/tracing-beam.js"></script>
+  <script src="./js/script.js"></script>
+</body>
+
+</html>

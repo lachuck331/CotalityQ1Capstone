@@ -1,0 +1,38 @@
+[
+  {
+    "name": "Stuti Verma",
+    "role": "Team Member",
+    "image": "assets/stuti.jpg",
+    "email": "stverma@ucsd.edu"
+  },
+  {
+    "name": "Gahn Wuwong",
+    "role": "Team Member",
+    "image": "assets/gahn.jpeg",
+    "email": "gwuwong@ucsd.edu"
+  },
+  {
+    "name": "Lacha Barton-Gluzman",
+    "role": "Team Member",
+    "image": "",
+    "email": "lbartongluzman@ucsd.edu"
+  },
+  {
+    "name": "Diego Arevalo Fernandez",
+    "role": "Team Member",
+    "image": "assets/diego.jpg",
+    "email": "darevalofernandez@ucsd.edu"
+  },
+  {
+    "name": "Ilyes Meftah",
+    "role": "Advisor",
+    "image": "",
+    "email": "Imeftah@cotality.com"
+  },
+  {
+    "name": "Aaron Bagnell",
+    "role": "Advisor",
+    "image": "",
+    "email": "abagnell@cotality.com"
+  }
+]

@@ -1,0 +1,73 @@
+/* ---------- People / Team ---------- */
+.person {
+  border-radius: var(--r);
+  border: 1px solid var(--stroke);
+  background: var(--card);
+  padding: 24px 18px;
+  text-align: center;
+  transition: border-color .2s ease, transform .2s ease;
+}
+
+.person:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+}
+
+.avatar {
+  width: 52px;
+  height: 52px;
+  margin: 0 auto 10px;
+  border-radius: 50%;
+  border: 2px solid var(--stroke);
+  background: var(--accent-soft);
+  background-size: cover;
+  background-position: center;
+}
+
+.person__name {
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.person__role {
+  margin-top: 2px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.person__links {
+  margin-top: 8px;
+  font-size: 13px;
+}
+
+.person__links a {
+  color: var(--accent-text);
+}
+
+.person__links a:hover {
+  text-decoration: underline;
+}
+
+/* ---------- Proof ---------- */
+.proof {
+  margin-top: 20px;
+  border-radius: var(--r);
+  border: 1px solid var(--stroke);
+  background: var(--card);
+  padding: 14px;
+}
+
+.proof__inner {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.proof__item {
+  padding: 12px;
+  color: var(--text-secondary);
+  display: flex;
+  gap: 8px;
+  font-size: 13px;
+}
+

@@ -1,0 +1,63 @@
+<div class="wrap">
+  <div class="section__head reveal">
+    <h2>Results</h2>
+    <p>
+      On random train/test evaluation, the tuned gradient-boosting model clearly outperforms the strongest baseline in
+      ranking quality. On temporally held-out data, the same model shows a much weaker minority-event signal.
+    </p>
+    <p>
+      This pattern suggests the model learns strong in-distribution ranking signal but remains sensitive to temporal
+      shift. For planning workflows, the model is useful as a comparative risk-ranking tool, but it still requires
+      calibration and threshold strategy before high-confidence deployment decisions.
+    </p>
+  </div>
+
+  <div class="resultsTable reveal">
+    <div class="resultsTable__head">Model Comparison</div>
+    <div class="resultsTable__grid resultsTable__grid--header">
+      <div>Model</div>
+      <div>Test ROC-AUC</div>
+      <div>Test PR-AUC</div>
+      <div>Validation ROC-AUC</div>
+      <div>Validation PR-AUC</div>
+    </div>
+    <div class="resultsTable__grid">
+      <div>Best Baseline (Logistic Regression)</div>
+      <div>0.8703</div>
+      <div>0.0063</div>
+      <div>0.8652</div>
+      <div>0.0035</div>
+    </div>
+    <div class="resultsTable__grid">
+      <div>Baseline (Linear SVM)</div>
+      <div>0.8112</div>
+      <div>0.0020</div>
+      <div></div>
+      <div></div>
+    </div>
+    <div class="resultsTable__grid">
+      <div>Tuned XGBoost</div>
+      <div>0.9448</div>
+      <div>0.5548</div>
+      <div>0.8425</div>
+      <div>0.0113</div>
+    </div>
+  </div>
+
+  <div class="vizCard reveal">
+    <div class="vizCard__top">
+      <h3>Tuned Model Feature Importance</h3>
+      <button id="importanceToggle" class="btn btn--small" type="button">Show All Features</button>
+    </div>
+    <div id="featureImportanceViz" class="d3-stage" aria-label="Feature importance visualization"></div>
+    <!-- <div class="vizCaption">
+      Animated D3 feature-importance view. Top features are shown by default.
+    </div> -->
+  </div>
+
+  <div class="section__head reveal resultsExplorerHead">
+    <h2>Model Output Explorer</h2>
+    <p>Use the interactive map to compare predicted probability surfaces, observed burns, and environmental drivers by month. This helps distinguish where model confidence aligns with historical burn patterns and where uncertainty remains high.</p>
+  </div>
+  <div id="resultsDemoHost" class="reveal"></div>
+</div>

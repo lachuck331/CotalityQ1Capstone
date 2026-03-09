@@ -1,0 +1,40 @@
+<div class="wrap">
+  <div class="section__head reveal">
+    <h2>Methodology</h2>
+    <p>
+      We use a staged modeling strategy to separate signal discovery from final optimization. First, we establish
+      interpretable baselines and failure modes for rare-event detection; then we optimize an imbalance-aware
+      gradient-boosting model using PR-AUC as the primary objective.
+    </p>
+  </div>
+
+  <div class="methodology-timeline">
+    <article class="card methodology-step reveal">
+      <span class="methodology-step__dot" aria-hidden="true">1</span>
+      <div class="card__top">
+        <h3>Baselines First</h3>
+      </div>
+      <p>Baseline experiments include Logistic Regression, Random Forest, and Linear SVM to establish reference behavior and calibration risk. Finalized outputs shown on this site emphasize Logistic Regression (best baseline) and Linear SVM.</p>
+    </article>
+
+    <article class="card methodology-step reveal">
+      <span class="methodology-step__dot" aria-hidden="true">2</span>
+      <div class="card__top">
+        <h3>Extreme Imbalance</h3>
+      </div>
+      <p>
+        Positive fire labels are extremely rare in this statewide monthly setting, so thresholded metrics can be
+        misleading. We therefore prioritize ranking metrics and inspect temporal holdout behavior to evaluate
+        real-world robustness.
+      </p>
+    </article>
+
+    <article class="card methodology-step reveal">
+      <span class="methodology-step__dot" aria-hidden="true">3</span>
+      <div class="card__top">
+        <h3>XGBoost + Optuna</h3>
+      </div>
+      <p>CUDA-accelerated XGBoost is tuned with Optuna (10 trials) using PR-AUC as the optimization objective, then evaluated on both random test splits and a strict 2005–2009 temporal holdout.</p>
+    </article>
+  </div>
+</div>
