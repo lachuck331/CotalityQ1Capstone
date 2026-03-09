@@ -640,6 +640,12 @@
   }
 }
 
+@media (max-width: 768px) {
+  .resultsExplorer {
+    display: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .pipeline-link--animated {
     animation: none;

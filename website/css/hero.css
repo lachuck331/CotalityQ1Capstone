@@ -173,8 +173,8 @@ body::after {
   }
 }
 
-/* Ensure all page content sits above the background */
-.topbar, main, .footer {
+/* Ensure page content sits above the background */
+main, .footer {
   position: relative;
   z-index: 1;
 }

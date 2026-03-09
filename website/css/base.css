@@ -139,10 +139,11 @@ a {
   top: 0;
   left: 0;
   right: 0;
-  z-index: 100;
+  z-index: 1200;
   display: flex;
   justify-content: center;
-  pointer-events: none;
+  pointer-events: auto;
+  isolation: isolate;
 }
 
 .topbar::before,

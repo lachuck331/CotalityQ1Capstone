@@ -14,6 +14,7 @@ async function loadSection(id, file) {
 }
 
 async function loadAllSections() {
+  const showResultsExplorer = !window.matchMedia("(max-width: 768px)").matches;
   const sections = [
     { id: "introduction", file: "./sections/introduction.html" },
     { id: "pipeline", file: "./sections/pipeline.html" },
@@ -26,7 +27,9 @@ async function loadAllSections() {
   ];
 
   await Promise.all(sections.map(s => loadSection(s.id, s.file)));
-  await loadSection("resultsDemoHost", "./sections/demo.html");
+  if (showResultsExplorer) {
+    await loadSection("resultsDemoHost", "./sections/demo.html");
+  }
 
   if (window.Team) await window.Team.init();
 
@@ -38,7 +41,7 @@ async function loadAllSections() {
 
   if (window.initPipelineViz) window.initPipelineViz();
   if (window.initFeatureImportanceViz) window.initFeatureImportanceViz();
-  if (window.initDemo) window.initDemo();
+  if (showResultsExplorer && window.initDemo) window.initDemo();
 }
 
 (() => {

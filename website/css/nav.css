@@ -70,3 +70,79 @@
   height: 16px;
 }
 
+.mobile-nav {
+  position: fixed;
+  top: 92px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(420px, calc(100vw - 32px));
+  margin: 0;
+  padding: 12px;
+  border-radius: 20px;
+  border: 1px solid var(--stroke);
+  background: var(--surface);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.28);
+  pointer-events: auto;
+  z-index: 1300;
+}
+
+.mobile-nav[hidden] {
+  display: none;
+}
+
+.mobile-nav__link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid transparent;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 600;
+  transform: translateX(0);
+  transition:
+    background .2s ease,
+    color .2s ease,
+    border-color .2s ease,
+    box-shadow .2s ease,
+    transform .2s ease;
+}
+
+.mobile-nav__link:hover,
+.mobile-nav__link:focus-visible {
+  background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+  color: var(--accent-text);
+  border-color: color-mix(in srgb, var(--accent) 32%, var(--stroke));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 18%, transparent);
+  transform: translateX(4px);
+}
+
+.mobile-nav__link:active {
+  transform: translateX(2px) scale(0.99);
+}
+
+.mobile-nav__link + .mobile-nav__link {
+  margin-top: 4px;
+}
+
+.mobile-nav__link--github svg {
+  width: 14px;
+  height: 14px;
+  fill: currentColor;
+}
+
+@media (min-width: 981px) {
+  .mobile-nav {
+    display: none !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .mobile-nav {
+    top: 88px;
+    width: calc(100vw - 24px);
+  }
+}

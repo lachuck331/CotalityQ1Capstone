@@ -9,17 +9,30 @@ const UI = {
     const burger = document.getElementById("burger");
     const mobile = document.getElementById("mobile");
     if (burger && mobile) {
+      const syncMenuState = (isOpen) => {
+        burger.setAttribute("aria-expanded", String(isOpen));
+        burger.setAttribute("aria-label", isOpen ? "Close menu" : "Open menu");
+        mobile.hidden = !isOpen;
+      };
+
+      syncMenuState(false);
+
       burger.addEventListener("click", () => {
         const isOpen = burger.getAttribute("aria-expanded") === "true";
-        burger.setAttribute("aria-expanded", String(!isOpen));
-        mobile.hidden = isOpen;
+        syncMenuState(!isOpen);
       });
+
       mobile.querySelectorAll("a").forEach(a => {
         a.addEventListener("click", () => {
-          burger.setAttribute("aria-expanded", "false");
-          mobile.hidden = true;
+          syncMenuState(false);
         });
       });
+
+      window.addEventListener("resize", () => {
+        if (!window.matchMedia("(max-width: 980px)").matches) {
+          syncMenuState(false);
+        }
+      }, { passive: true });
     }
   },
 
