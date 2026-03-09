@@ -7,8 +7,3 @@ __pycache__
 uv.lock
 .ipynb_checkpoints/
 *.csv
-*.parquet
-*.pkl
-*.model
-/data/
-/results/
